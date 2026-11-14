@@ -163,6 +163,7 @@ struct TemplateView: View {
                         RoundedRectangle(cornerRadius: 6, style: .continuous)
                             .fill(Color(hexString: shot.color))
                             .frame(width: 34, height: 44)
+                            .accessibilityHidden(true)
                         VStack(alignment: .leading, spacing: 2) {
                             Text(shot.hint)
                                 .font(.subheadline)
@@ -174,7 +175,6 @@ struct TemplateView: View {
                         Spacer(minLength: 0)
                     }
                     .padding(.vertical, 8)
-                    .accessibilityElement(children: .combine)
                 }
             }
             if template.shots.count > 6 {
@@ -219,7 +219,7 @@ struct TemplateView: View {
                 let n = clipCount
                 startImport(n) { progress in try await ClipImporter.sampleClips(count: n, progress: progress) }
             }
-            .buttonStyle(LinkButtonStyle(color: Theme.text2))
+            .buttonStyle(LinkButtonStyle(color: Theme.text))
             .accessibilityIdentifier("use-samples")
         }
         .padding(.horizontal, 20)

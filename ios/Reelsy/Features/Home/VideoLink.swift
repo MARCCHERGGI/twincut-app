@@ -50,15 +50,19 @@ struct PasteLinkBox: View {
     @State private var text = ""
     @State private var invalid = false
     @FocusState private var focused: Bool
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 10) {
+            let layout = dynamicTypeSize.isAccessibilitySize
+                ? AnyLayout(VStackLayout(alignment: .leading, spacing: 8))
+                : AnyLayout(HStackLayout(spacing: 10))
+            layout {
                 Image(systemName: "link")
                     .scaledFont(16, .semibold)
                     .foregroundStyle(Theme.text2)
                     .accessibilityHidden(true)
-                TextField("Paste a video link", text: $text)
+                TextField("Video link", text: $text, prompt: Text("Paste a link"))
                     .keyboardType(.URL)
                     .textContentType(.URL)
                     .textInputAutocapitalization(.never)
@@ -142,6 +146,7 @@ struct PasteLinkBox: View {
 /// After pasting a link to a page: open it, save the video there, come back.
 struct GetVideoSheet: View {
     let link: VideoLink
+    let onClose: () -> Void
     let onOpen: () -> Void
     let onPickNow: () -> Void
 
@@ -170,6 +175,10 @@ struct GetVideoSheet: View {
                 Button("I already have it") { onPickNow() }
                     .buttonStyle(LinkButtonStyle())
                     .frame(maxWidth: .infinity)
+                Button("Not now") { onClose() }
+                    .buttonStyle(LinkButtonStyle(color: Theme.text))
+                    .frame(maxWidth: .infinity)
+                    .accessibilityIdentifier("close-link-sheet")
             }
             .padding(24)
         }

@@ -128,7 +128,7 @@ struct ExportView: View {
                 }
                 .font(.headline)
                 .accessibilityIdentifier("done-button")
-                .confirmationDialog("Leave without saving?", isPresented: $confirmLeave, titleVisibility: .visible) {
+                .alert("Leave without saving?", isPresented: $confirmLeave) {
                     Button("Save to Photos") { Task { await save(); if saved { onDone() } } }
                     Button("Leave without saving", role: .destructive) { onDone() }
                     Button("Cancel", role: .cancel) {}

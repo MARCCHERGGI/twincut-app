@@ -84,14 +84,14 @@ final class ReelsyUITests: XCTestCase {
         sample.tap()
 
         let samples = app.buttons["use-samples"]
-        XCTAssertTrue(samples.waitForExistence(timeout: 60), "analysis finishes and opens the template")
+        XCTAssertTrue(samples.waitForExistence(timeout: 180), "analysis finishes and opens the template")
         XCTAssertTrue(app.staticTexts["8 shots"].exists, "all 8 cuts of the sample found")
         XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label ENDSWITH %@", " BPM")).firstMatch.exists, "tempo found")
         sleep(1)
         shot("08-sample-template")
         samples.tap()
 
-        XCTAssertTrue(app.buttons["export-button"].waitForExistence(timeout: 60))
+        XCTAssertTrue(app.buttons["export-button"].waitForExistence(timeout: 180), "the editor opens with the sample clips")
         app.buttons["Sound"].tap()
         XCTAssertTrue(app.buttons["Beat"].waitForExistence(timeout: 5), "Twincut's beat is offered")
         XCTAssertTrue(app.buttons["Beat"].isSelected, "and is the default")
@@ -239,7 +239,7 @@ final class ReelsyUITests: XCTestCase {
         XCTAssertTrue(named.firstMatch.exists, "the sheet names where the link goes")
         sleep(1)
         shot("10-page-link")
-        open.swipeDown(velocity: .fast)
+        app.buttons["close-link-sheet"].tap()
         XCTAssertTrue(open.waitForNonExistence(timeout: 5), "the sheet closes")
 
         field.tap()

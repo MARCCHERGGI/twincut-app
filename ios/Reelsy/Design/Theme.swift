@@ -6,8 +6,8 @@ enum Theme {
     static let raised = Color(hex: 0x1E1E23)
     static let stroke = Color.white.opacity(0.08)
     static let text = Color.white
-    static let text2 = Color.white.opacity(0.66)
-    static let text3 = Color.white.opacity(0.6)
+    static let text2 = Color(white: 0.72)
+    static let text3 = Color(white: 0.64)
     static let accent = Color(hex: 0xE4FF3A)
     static let onAccent = Color.black
     static let danger = Color(hex: 0xFF5A4E)
@@ -79,6 +79,8 @@ struct LinkButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.subheadline.weight(.semibold))
+            .multilineTextAlignment(.leading)
+            .fixedSize(horizontal: false, vertical: true)
             .foregroundStyle(color)
             .frame(minHeight: 44)
             .contentShape(Rectangle())

@@ -48,11 +48,11 @@ struct EditorView: View {
                     project.suspend()
                     model.exporting = ExportJob(projectID: project.id)
                 }
-                .buttonStyle(PillButtonStyle(filled: true))
+                .fontWeight(.semibold)
+                .buttonStyle(.borderedProminent)
+                .tint(Theme.accent)
+                .foregroundStyle(Theme.onAccent)
                 .disabled(project.previewError != nil)
-                .accessibilityShowsLargeContentViewer {
-                    Label("Export", systemImage: "square.and.arrow.up")
-                }
                 .accessibilityIdentifier("export-button")
             }
         }
@@ -259,6 +259,16 @@ struct ClipThumb: View {
     var uses = 1
 
     var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            thumbnail
+            Text((clip.isPhoto ? "Photo" : clip.duration.secondsLabel) + (uses > 1 ? " · \(uses)×" : ""))
+                .font(.caption.monospacedDigit())
+                .foregroundStyle(Theme.text2)
+                .fixedSize()
+        }
+    }
+
+    private var thumbnail: some View {
         ZStack(alignment: .bottomLeading) {
             if let thumb = clip.thumbnail {
                 Image(decorative: thumb, scale: 1)
@@ -267,32 +277,10 @@ struct ClipThumb: View {
             } else {
                 Theme.raised
             }
-            HStack(spacing: 3) {
-                if clip.isPhoto { Image(systemName: "photo") }
-                Text(clip.isPhoto ? "" : clip.duration.secondsLabel)
-            }
-            .font(.caption2.weight(.bold).monospacedDigit())
-            .foregroundStyle(.white)
-            .padding(.horizontal, 6)
-            .padding(.vertical, 3)
-            .background(Capsule().fill(.black.opacity(0.8)))
-            .padding(5)
-            .accessibilityHidden(true)
         }
         .frame(width: 62, height: 96)
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(color, lineWidth: 3))
-        .overlay(alignment: .topTrailing) {
-            if uses > 1 {
-                Text("×\(uses)")
-                    .font(.caption2.weight(.heavy))
-                    .foregroundStyle(.black)
-                    .padding(.horizontal, 5)
-                    .padding(.vertical, 2)
-                    .background(Capsule().fill(color))
-                    .offset(x: 4, y: -4)
-            }
-        }
     }
 }
 

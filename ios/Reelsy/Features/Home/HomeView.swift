@@ -19,6 +19,7 @@ struct HomeView: View {
     @State private var showFiles = false
     @State private var pickedFile: URL?
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.openURL) private var openURL
 
     var body: some View {
@@ -61,7 +62,7 @@ struct HomeView: View {
                 showPicker = true
             }
         }) { link in
-            GetVideoSheet(link: link) {
+            GetVideoSheet(link: link, onClose: { pageLink = nil }) {
                 awaitingSave = true
                 pageLink = nil
                 openURL(link.url)
@@ -138,17 +139,18 @@ struct HomeView: View {
             PasteLinkBox(checking: checkingLink) { link in
                 Task { await open(link) }
             }
-            ViewThatFits(in: .horizontal) {
+            if dynamicTypeSize > .large {
+                VStack(alignment: .leading, spacing: 0) {
+                    filesButton
+                    copyHelp
+                    sampleButton
+                }
+            } else {
                 HStack {
                     filesButton
                     Spacer()
                     copyHelp
                     Spacer()
-                    sampleButton
-                }
-                VStack(alignment: .leading, spacing: 0) {
-                    filesButton
-                    copyHelp
                     sampleButton
                 }
             }
@@ -288,18 +290,6 @@ struct TemplateCard: View {
                 }
                 .frame(width: geo.size.width, height: geo.size.height, alignment: .leading)
                 .overlay(LinearGradient(colors: [.clear, .black.opacity(0.55)], startPoint: .center, endPoint: .bottom))
-                .overlay(alignment: .bottomLeading) {
-                    if let bpm = template.tempo?.bpm {
-                        Text("\(Int(bpm.rounded())) BPM")
-                            .font(.caption2.weight(.bold).monospacedDigit())
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(Capsule().fill(.black.opacity(0.8)))
-                            .padding(10)
-                            .accessibilityHidden(true)
-                    }
-                }
             }
             .frame(height: fillsWidth ? 200 : 230)
             .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
@@ -308,9 +298,8 @@ struct TemplateCard: View {
                 Text(template.title)
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(Theme.text)
-                    .lineLimit(2, reservesSpace: !fillsWidth)
                     .fixedSize(horizontal: false, vertical: true)
-                Text("\(template.shots.count) shots · \(template.duration.secondsLabel)")
+                Text(caption)
                     .font(.caption.monospacedDigit())
                     .foregroundStyle(Theme.text3)
             }
@@ -319,6 +308,12 @@ struct TemplateCard: View {
         .frame(maxWidth: fillsWidth ? .infinity : nil, alignment: .leading)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(cardLabel)
+    }
+
+    private var caption: String {
+        var parts = ["\(template.shots.count) shots", template.duration.secondsLabel]
+        if let bpm = template.tempo?.bpm { parts.append("\(Int(bpm.rounded())) BPM") }
+        return parts.joined(separator: " · ")
     }
 
     private var cardLabel: String {
