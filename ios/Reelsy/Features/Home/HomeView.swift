@@ -139,19 +139,21 @@ struct HomeView: View {
             PasteLinkBox(checking: checkingLink) { link in
                 Task { await open(link) }
             }
-            if dynamicTypeSize > .large {
-                VStack(alignment: .leading, spacing: 0) {
-                    filesButton
-                    copyHelp
-                    sampleButton
-                }
-            } else {
-                HStack {
-                    filesButton
-                    Spacer()
-                    copyHelp
-                    Spacer()
-                    sampleButton
+            Group {
+                if dynamicTypeSize > .large {
+                    VStack(alignment: .leading, spacing: 0) {
+                        filesButton
+                        copyHelp
+                        sampleButton
+                    }
+                } else {
+                    HStack {
+                        filesButton
+                        Spacer()
+                        copyHelp
+                        Spacer()
+                        sampleButton
+                    }
                 }
             }
             .padding(.horizontal, 4)
