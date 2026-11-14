@@ -45,14 +45,14 @@ struct AnalyzeView: View {
             .padding(.top, 8)
 
             Spacer()
-            if let error {
+            if let message = error {
                 VStack(spacing: 16) {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .scaledFont(40, relativeTo: .largeTitle)
                         .foregroundStyle(Theme.danger)
                     Text("Couldn't read that video")
                         .font(.title2.weight(.bold))
-                    Text(error)
+                    Text(message)
                         .font(.body)
                         .foregroundStyle(Theme.text2)
                         .multilineTextAlignment(.center)
