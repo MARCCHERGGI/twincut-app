@@ -70,7 +70,7 @@ enum ShotReader {
         return look
     }
 
-    private static let chrome = ["tiktok", "instagram", "capcut", "reels", "original audio", "follow", "@"]
+    private static let chrome = ["tiktok", "instagram", "youtube", "shorts", "snapchat", "facebook", "capcut", "reels", "original audio", "follow", "subscribe", "@"]
 
     /// The reference's main on-screen caption: big text inside the safe area, lines that sit
     /// together joined in reading order. Usernames, watermarks and app chrome are skipped.

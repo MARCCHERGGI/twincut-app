@@ -5,7 +5,7 @@ struct OnboardingView: View {
     @State private var page = 0
 
     private let pages: [(title: String, body: String)] = [
-        ("Copy any video's edit", "Pick a video from Photos. Twincut finds every cut, the beat and where the captions sit, without uploading anything."),
+        ("Copy any video's edit", "Pick a video or paste a link from any app. Twincut finds every cut, the beat and where the captions sit, without uploading anything."),
         ("Your clips, its rhythm", "Choose how many clips you want. Twincut times each one to the beat, and you can pick which moment of a clip plays."),
         ("Ready to post", "Export in 1080p with a beat Twincut makes to fit your cuts. It's yours to post anywhere."),
     ]

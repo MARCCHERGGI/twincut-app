@@ -34,6 +34,22 @@ enum ClipImporter {
         return movie.url
     }
 
+    /// Copies a movie chosen in Files into the cache, downloading it first if it lives in iCloud.
+    static func copyFile(_ picked: URL) async throws -> URL {
+        try await Task.detached {
+            let scoped = picked.startAccessingSecurityScopedResource()
+            defer { if scoped { picked.stopAccessingSecurityScopedResource() } }
+            let dest = Storage.newClipURL(ext: picked.pathExtension)
+            var coordinationError: NSError?
+            var copyError: Error?
+            NSFileCoordinator().coordinate(readingItemAt: picked, options: [], error: &coordinationError) { readable in
+                do { try FileManager.default.copyItem(at: readable, to: dest) } catch { copyError = error }
+            }
+            if coordinationError != nil || copyError != nil { throw Failure.unreadable }
+            return dest
+        }.value
+    }
+
     static func importClip(_ item: PhotosPickerItem) async throws -> ClipAsset {
         if isMovie(item) {
             return try await ClipProbe.probe(url: try await movieURL(item), isPhoto: false)

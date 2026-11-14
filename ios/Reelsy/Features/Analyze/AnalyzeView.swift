@@ -5,8 +5,22 @@ import SwiftUI
 /// Where the reel to copy comes from.
 enum ReelSource {
     case photos(PhotosPickerItem)
+    /// A movie chosen in Files (security-scoped, copied before reading).
+    case file(URL)
+    /// A direct link to a video file.
+    case link(VideoLink)
     /// The bundled sample reel, for anyone with no reel saved yet.
     case sample
+
+    /// The first step's label, or nil when there's nothing to fetch.
+    var fetchLabel: String? {
+        switch self {
+        case .photos: "Copying from Photos"
+        case .file: "Copying from Files"
+        case .link: "Downloading the video"
+        case .sample: nil
+        }
+    }
 }
 
 /// Reads the chosen reel into a template, showing each stage as it really happens.
@@ -19,7 +33,6 @@ struct AnalyzeView: View {
     @State private var error: String?
     @State private var attempt = 0
 
-    private var isSample: Bool { if case .sample = source { true } else { false } }
 
     var body: some View {
         VStack(spacing: 32) {
@@ -59,8 +72,8 @@ struct AnalyzeView: View {
                     .frame(height: 120)
                     .padding(.horizontal, 28)
                 VStack(alignment: .leading, spacing: 14) {
-                    if !isSample {
-                        row("Copying from Photos", done: stage != nil, active: stage == nil)
+                    if let fetch = source.fetchLabel {
+                        row(fetch, done: stage != nil, active: stage == nil)
                     }
                     ForEach(AnalysisStage.allCases.filter { $0 != .done }, id: \.self) { s in
                         row(s.label, done: (stage ?? .reading) > s, active: stage == s)
@@ -105,8 +118,14 @@ struct AnalyzeView: View {
         do {
             var template: Template
             switch source {
-            case .photos(let item):
-                let url = try await ClipImporter.movieURL(item)
+            case .photos, .file, .link:
+                let url: URL
+                switch source {
+                case .photos(let item): url = try await ClipImporter.movieURL(item)
+                case .file(let picked): url = try await ClipImporter.copyFile(picked)
+                case .link(let link): url = try await LinkDownloader.download(link)
+                case .sample: throw AnalysisError.noVideo
+                }
                 defer { try? FileManager.default.removeItem(at: url) }
                 template = try await ReferenceAnalyzer.analyze(url: url) { stage = $0 }
                 // Keep each caption's timing, place and size; the words are the creator's, the user writes their own.
@@ -159,7 +178,7 @@ struct WhatToCopyView: View {
     @Environment(\.dismiss) private var dismiss
 
     private let steps: [(app: String, icon: String, text: String)] = [
-        ("Your own videos", "person.crop.square", "Any video in your Photos works: your reels, drafts and edits."),
+        ("Your own videos", "person.crop.square", "Any video in Photos or Files works: your posts, drafts and edits."),
         ("Someone else's video", "person.2", "Only when you have the right to use it, like a creator who shares an edit for others to use."),
     ]
 

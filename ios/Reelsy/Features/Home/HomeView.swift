@@ -1,5 +1,6 @@
 import PhotosUI
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct HomeView: View {
     @Environment(AppModel.self) private var model
@@ -10,6 +11,14 @@ struct HomeView: View {
     @State private var showSettings = false
     @State private var renaming: Template?
     @State private var newTitle = ""
+    @State private var checkingLink = false
+    @State private var pageLink: VideoLink?
+    @State private var awaitingSave = false
+    @State private var showPicker = false
+    @State private var pickAfterSheet = false
+    @State private var showFiles = false
+    @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.openURL) private var openURL
 
     var body: some View {
         ScrollView {
@@ -43,6 +52,33 @@ struct HomeView: View {
             } onCancel: {
                 analyzing = nil
             }
+        }
+        .sheet(item: $pageLink, onDismiss: {
+            // Present the picker only once the sheet is gone; two presentations at once drop one.
+            if pickAfterSheet {
+                pickAfterSheet = false
+                showPicker = true
+            }
+        }) { link in
+            GetVideoSheet(link: link) {
+                awaitingSave = true
+                pageLink = nil
+                openURL(link.url)
+            } onPickNow: {
+                pickAfterSheet = true
+                pageLink = nil
+            }
+        }
+        // Back from the other app with the video saved: open the picker, newest first.
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active && awaitingSave {
+                awaitingSave = false
+                showPicker = true
+            }
+        }
+        .photosPicker(isPresented: $showPicker, selection: $referenceItem, matching: .videos, preferredItemEncoding: .current)
+        .fileImporter(isPresented: $showFiles, allowedContentTypes: [.movie]) { result in
+            if case .success(let url) = result { analyzing = AnalyzeRequest(source: .file(url)) }
         }
         .sheet(isPresented: $showHowTo) { WhatToCopyView() }
         .sheet(isPresented: $showSettings) { SettingsView() }
@@ -83,7 +119,7 @@ struct HomeView: View {
                 .frame(height: 70)
             Text("Copy any video's edit")
                 .scaledFont(28, .bold, relativeTo: .title)
-            Text("Pick a video from Photos. Twincut finds every cut, the beat and where the captions sit, without uploading anything.")
+            Text("Pick a video or paste a link from any app. Twincut finds every cut, the beat and where the captions sit, without uploading anything.")
                 .font(.subheadline)
                 .foregroundStyle(Theme.text2)
                 .fixedSize(horizontal: false, vertical: true)
@@ -92,13 +128,19 @@ struct HomeView: View {
             }
             .buttonStyle(PrimaryButtonStyle())
             .accessibilityIdentifier("choose-reel")
+            PasteLinkBox(checking: checkingLink) { link in
+                Task { await open(link) }
+            }
             ViewThatFits(in: .horizontal) {
                 HStack {
+                    filesButton
+                    Spacer()
                     copyHelp
                     Spacer()
                     sampleButton
                 }
                 VStack(alignment: .leading, spacing: 0) {
+                    filesButton
                     copyHelp
                     sampleButton
                 }
@@ -108,6 +150,23 @@ struct HomeView: View {
         .padding(20)
         .background(RoundedRectangle(cornerRadius: 28, style: .continuous).fill(Theme.surface))
         .overlay(RoundedRectangle(cornerRadius: 28, style: .continuous).strokeBorder(Theme.stroke))
+    }
+
+    private var filesButton: some View {
+        Button("From Files") { showFiles = true }
+            .buttonStyle(LinkButtonStyle())
+            .accessibilityIdentifier("choose-file")
+    }
+
+    /// A direct video link is read straight away; a page opens in its own app first.
+    private func open(_ link: VideoLink) async {
+        checkingLink = true
+        defer { checkingLink = false }
+        if await LinkDownloader.pointsAtVideo(link) {
+            analyzing = AnalyzeRequest(source: .link(link))
+        } else {
+            pageLink = link
+        }
     }
 
     private var copyHelp: some View {
@@ -148,7 +207,7 @@ struct HomeView: View {
                         Image(systemName: "sparkles.rectangle.stack")
                             .font(.title2)
                             .foregroundStyle(Theme.accent)
-                        Text("Reels you copy are saved here as templates you can use again.")
+                        Text("Videos you copy are saved here as templates you can use again.")
                             .font(.subheadline)
                             .foregroundStyle(Theme.text2)
                     }

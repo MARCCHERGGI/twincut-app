@@ -364,7 +364,7 @@ private struct SoundPanel: View {
         switch project.sound {
         case .beat: "A beat Twincut makes for this edit. It hits on every beat the cuts follow, and it's yours to post anywhere."
         case .clips: "Keeps the sound recorded with each clip."
-        case .off: "Exports without sound, so you can add a song in Instagram or TikTok."
+        case .off: "Exports without sound, so you can add a song in the app you post to."
         }
     }
 

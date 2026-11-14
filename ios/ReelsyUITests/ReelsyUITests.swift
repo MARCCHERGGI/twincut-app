@@ -217,6 +217,35 @@ final class ReelsyUITests: XCTestCase {
         XCTAssertEqual(saved.count, 1, "reading the sample twice keeps one template")
     }
 
+    /// Links from any app: plain text gets a hint, a page link explains how to save the video,
+    /// a direct video link is downloaded and read like any other video.
+    func testPastedLinks() throws {
+        let next = app.buttons["onboarding-next"]
+        XCTAssertTrue(next.waitForExistence(timeout: 10))
+        next.tap(); next.tap(); next.tap()
+
+        let field = app.textFields["link-field"]
+        XCTAssertTrue(field.waitForExistence(timeout: 10))
+        field.tap()
+        field.typeText("great edit\n")
+        XCTAssertTrue(app.staticTexts["That isn't a link. In any app, tap Share on the video, then Copy link."].waitForExistence(timeout: 5))
+
+        field.tap()
+        field.typeText("https://www.youtube.com/shorts/abc123\n")
+        let open = app.buttons["open-in-app"]
+        XCTAssertTrue(open.waitForExistence(timeout: 20), "a page link opens the how-to sheet")
+        XCTAssertTrue(open.label.contains("YouTube"), open.label)
+        sleep(1)
+        shot("10-page-link")
+        app.swipeDown(velocity: .fast)
+        XCTAssertTrue(field.waitForExistence(timeout: 10))
+
+        field.tap()
+        field.typeText("https://twincut.pages.dev/test/sample-reel.mp4\n")
+        XCTAssertTrue(app.buttons["use-samples"].waitForExistence(timeout: 120), "the linked video is downloaded and read")
+        XCTAssertTrue(app.staticTexts["8 shots"].exists, "all 8 cuts of the linked video found")
+    }
+
     /// Launch time as Apple defines it: tap to first frame, five launches.
     func testLaunchTime() throws {
         app.terminate()

@@ -159,7 +159,7 @@ struct ExportView: View {
                 HStack(alignment: .top, spacing: 12) {
                     Image(systemName: "music.note")
                         .foregroundStyle(Theme.accent)
-                    Text("This reel has no sound. Add a song when you post it in Instagram or TikTok.")
+                    Text("This reel has no sound. Add a song in the app you post it to.")
                         .font(.footnote)
                         .foregroundStyle(Theme.text2)
                         .fixedSize(horizontal: false, vertical: true)

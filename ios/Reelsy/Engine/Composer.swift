@@ -4,7 +4,7 @@ import UIKit
 enum SoundMode: String, CaseIterable, Identifiable {
     /// Twincut's own beat, generated on the template's beat times (BeatSynth).
     case beat
-    /// Silent export: the user adds a song inside Instagram or TikTok.
+    /// Silent export: the user adds a song in the app they post to.
     case off
     /// Keep each clip's own sound.
     case clips

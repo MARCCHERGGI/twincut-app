@@ -72,7 +72,7 @@ struct Template: Codable, Identifiable, Hashable {
         case top, middle, bottom
 
         /// Vertical centre of a caption as a fraction of frame height, kept clear of the
-        /// app chrome Instagram and TikTok draw over the top and bottom of a reel.
+        /// app chrome that short-video apps draw over the top and bottom of a reel.
         var y: Double {
             switch self {
             case .top: return 0.22
