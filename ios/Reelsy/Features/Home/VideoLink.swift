@@ -157,13 +157,13 @@ struct GetVideoSheet: View {
                     .fixedSize(horizontal: false, vertical: true)
                 VStack(alignment: .leading, spacing: 16) {
                     step(1, "Open the link in \(link.siteName).")
-                    step(2, "If the video is yours or you have the right to use it, save it there. If there's no save option, screen-record it while it plays.")
+                    step(2, "If the video is yours or you have the right to use it, save it to this device there.")
                     step(3, "Come back to Twincut. Your newest videos open on their own.")
                 }
                 Button {
                     onOpen()
                 } label: {
-                    Label("Open in \(link.siteName)", systemImage: "arrow.up.right")
+                    Label("Open link", systemImage: "arrow.up.right")
                 }
                 .buttonStyle(PrimaryButtonStyle())
                 .accessibilityIdentifier("open-in-app")

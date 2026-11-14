@@ -5,13 +5,14 @@ import Foundation
 /// video is kept.
 enum LinkDownloader {
     enum Failure: LocalizedError {
-        case notAVideo, tooBig, unreachable
+        case notAVideo, tooBig, unreachable, noRoom
 
         var errorDescription: String? {
             switch self {
             case .notAVideo: "That link isn't a video file. Save the video to this device, then pick it."
             case .tooBig: "That video is over 1 GB. Trim it or pick a shorter one."
             case .unreachable: "Couldn't reach that link. Check your connection and try again."
+            case .noRoom: "Your device is almost out of space. Free up some room and try again."
             }
         }
     }
@@ -30,6 +31,15 @@ enum LinkDownloader {
 
     /// Downloads the video into the clip cache and returns its file URL.
     static func download(_ link: VideoLink) async throws -> URL {
+        // Refuse an oversized file before fetching it when the server says how big it is.
+        var head = URLRequest(url: link.url, timeoutInterval: 8)
+        head.httpMethod = "HEAD"
+        if let answer = try? await URLSession.shared.data(for: head), answer.1.expectedContentLength > maxBytes {
+            throw Failure.tooBig
+        }
+        if let free = Storage.freeBytes(), free < 2 * maxBytes / 10 {
+            throw Failure.noRoom
+        }
         let file: URL
         let response: URLResponse
         do {

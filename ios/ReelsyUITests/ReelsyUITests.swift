@@ -231,14 +231,16 @@ final class ReelsyUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["That isn't a link. In any app, tap Share on the video, then Copy link."].waitForExistence(timeout: 5))
 
         field.tap()
+        field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 12))  // the rejected text stays for editing
         field.typeText("https://www.youtube.com/shorts/abc123\n")
         let open = app.buttons["open-in-app"]
         XCTAssertTrue(open.waitForExistence(timeout: 20), "a page link opens the how-to sheet")
-        XCTAssertTrue(open.label.contains("YouTube"), open.label)
+        let named = app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS %@", "Open the link in YouTube"))
+        XCTAssertTrue(named.firstMatch.exists, "the sheet names where the link goes")
         sleep(1)
         shot("10-page-link")
-        app.swipeDown(velocity: .fast)
-        XCTAssertTrue(field.waitForExistence(timeout: 10))
+        open.swipeDown(velocity: .fast)
+        XCTAssertTrue(open.waitForNonExistence(timeout: 5), "the sheet closes")
 
         field.tap()
         field.typeText("https://twincut.pages.dev/test/sample-reel.mp4\n")

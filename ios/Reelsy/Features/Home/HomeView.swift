@@ -17,6 +17,7 @@ struct HomeView: View {
     @State private var showPicker = false
     @State private var pickAfterSheet = false
     @State private var showFiles = false
+    @State private var pickedFile: URL?
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.openURL) private var openURL
 
@@ -78,7 +79,13 @@ struct HomeView: View {
         }
         .photosPicker(isPresented: $showPicker, selection: $referenceItem, matching: .videos, preferredItemEncoding: .current)
         .fileImporter(isPresented: $showFiles, allowedContentTypes: [.movie]) { result in
-            if case .success(let url) = result { analyzing = AnalyzeRequest(source: .file(url)) }
+            if case .success(let url) = result { pickedFile = url }
+        }
+        // Like the photo picker, start reading only after the importer has gone.
+        .onChange(of: pickedFile) { _, url in
+            guard let url else { return }
+            analyzing = AnalyzeRequest(source: .file(url))
+            pickedFile = nil
         }
         .sheet(isPresented: $showHowTo) { WhatToCopyView() }
         .sheet(isPresented: $showSettings) { SettingsView() }
@@ -162,7 +169,10 @@ struct HomeView: View {
     private func open(_ link: VideoLink) async {
         checkingLink = true
         defer { checkingLink = false }
-        if await LinkDownloader.pointsAtVideo(link) {
+        let direct = await LinkDownloader.pointsAtVideo(link)
+        // Something else opened while the link was checked; presenting now would be dropped.
+        guard analyzing == nil, pageLink == nil, !showSettings, !showHowTo, !showPicker, !showFiles else { return }
+        if direct {
             analyzing = AnalyzeRequest(source: .link(link))
         } else {
             pageLink = link
