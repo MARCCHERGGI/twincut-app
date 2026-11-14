@@ -58,8 +58,8 @@ final class ReelsyUITests: XCTestCase {
         sleep(2)
         shot("05b-export-tapped")
         let done = app.buttons["done-button"]
-        // The simulator renders Core Image in software, about one frame a second on CI.
-        XCTAssertTrue(done.waitForExistence(timeout: 600), "export finishes")
+        // The simulator renders Core Image in software on CI: 600 s reached 81% on one runner.
+        XCTAssertTrue(done.waitForExistence(timeout: 1200), "export finishes")
         XCTAssertTrue(app.buttons["save-button"].exists)
         sleep(2)
         shot("06-export")

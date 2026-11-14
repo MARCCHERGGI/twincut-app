@@ -225,7 +225,11 @@ struct TemplateView: View {
         .padding(.horizontal, 20)
         .padding(.top, 12)
         .padding(.bottom, 8)
-        .background(LinearGradient(colors: [Theme.bg.opacity(0), Theme.bg, Theme.bg], startPoint: .top, endPoint: .bottom).ignoresSafeArea())
+        .background(alignment: .top) {
+            Theme.bg
+                .overlay(alignment: .top) { Rectangle().fill(Theme.stroke).frame(height: 1) }
+                .ignoresSafeArea()
+        }
         .disabled(isImporting)
     }
 

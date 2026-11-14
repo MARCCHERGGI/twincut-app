@@ -49,9 +49,7 @@ struct EditorView: View {
                     model.exporting = ExportJob(projectID: project.id)
                 }
                 .fontWeight(.semibold)
-                .buttonStyle(.borderedProminent)
                 .tint(Theme.accent)
-                .foregroundStyle(Theme.onAccent)
                 .disabled(project.previewError != nil)
                 .accessibilityIdentifier("export-button")
             }
@@ -286,18 +284,26 @@ struct ClipThumb: View {
 
 private struct TextPanel: View {
     @Bindable var project: ReelProject
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
                 if !project.captions.isEmpty {
-                    Picker("Style", selection: Binding(
-                        get: { project.captions.first?.style ?? .clean },
-                        set: { style in for i in project.captions.indices { project.captions[i].style = style } }
-                    )) {
-                        ForEach(CaptionStyle.allCases) { Text($0.label).tag($0) }
+                    let current = project.captions.first?.style ?? .clean
+                    let layout = dynamicTypeSize.isAccessibilitySize
+                        ? AnyLayout(VStackLayout(alignment: .leading, spacing: 8))
+                        : AnyLayout(HStackLayout(spacing: 8))
+                    layout {
+                        ForEach(CaptionStyle.allCases) { style in
+                            Button(style.label) {
+                                for i in project.captions.indices { project.captions[i].style = style }
+                            }
+                            .buttonStyle(PillButtonStyle(filled: style == current))
+                            .accessibilityAddTraits(style == current ? .isSelected : [])
+                            .accessibilityLabel("\(style.label) captions")
+                        }
                     }
-                    .pickerStyle(.segmented)
                 }
                 ForEach($project.captions) { $caption in
                     HStack(spacing: 10) {
