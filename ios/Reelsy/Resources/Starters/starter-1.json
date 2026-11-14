@@ -1,0 +1,291 @@
+{
+ "version": 1,
+ "id": "starter-beat-drop",
+ "title": "Beat drop",
+ "source": {
+  "kind": "starter",
+  "platform": null
+ },
+ "duration": 11.25,
+ "aspect": {
+  "width": 1080,
+  "height": 1920
+ },
+ "pace": "rapid",
+ "tempo": {
+  "bpm": 128,
+  "confidence": 1
+ },
+ "beats": [
+  0,
+  0.469,
+  0.938,
+  1.406,
+  1.875,
+  2.344,
+  2.813,
+  3.281,
+  3.75,
+  4.219,
+  4.688,
+  5.156,
+  5.625,
+  6.094,
+  6.563,
+  7.031,
+  7.5,
+  7.969,
+  8.438,
+  8.906,
+  9.375,
+  9.844,
+  10.313,
+  10.781
+ ],
+ "onBeat": 1,
+ "shots": [
+  {
+   "index": 0,
+   "start": 0,
+   "end": 1.875,
+   "color": "#3b4a8f",
+   "brightness": 0.32,
+   "motion": 0.15,
+   "framing": "wide",
+   "subject": "place",
+   "camera": "static",
+   "hint": "Wide, calm opener"
+  },
+  {
+   "index": 1,
+   "start": 1.875,
+   "end": 3.75,
+   "color": "#5a3d8a",
+   "brightness": 0.36,
+   "motion": 0.2,
+   "framing": "medium",
+   "subject": "person",
+   "camera": "pan",
+   "hint": "Slow push toward your subject"
+  },
+  {
+   "index": 2,
+   "start": 3.75,
+   "end": 4.219,
+   "color": "#e2563a",
+   "brightness": 0.62,
+   "motion": 0.8,
+   "framing": "close",
+   "subject": "object",
+   "camera": "handheld",
+   "hint": "Close-up as the beat drops"
+  },
+  {
+   "index": 3,
+   "start": 4.219,
+   "end": 4.688,
+   "color": "#f2b138",
+   "brightness": 0.7,
+   "motion": 0.75,
+   "framing": "medium",
+   "subject": "person",
+   "camera": "handheld",
+   "hint": "Fast pan on the beat"
+  },
+  {
+   "index": 4,
+   "start": 4.688,
+   "end": 5.156,
+   "color": "#2fb7c9",
+   "brightness": 0.55,
+   "motion": 0.85,
+   "framing": "wide",
+   "subject": "place",
+   "camera": "pan",
+   "hint": "Whip to a new place"
+  },
+  {
+   "index": 5,
+   "start": 5.156,
+   "end": 5.625,
+   "color": "#d9467a",
+   "brightness": 0.5,
+   "motion": 0.7,
+   "framing": "close",
+   "subject": "person",
+   "camera": "handheld",
+   "hint": "A face, reacting"
+  },
+  {
+   "index": 6,
+   "start": 5.625,
+   "end": 6.094,
+   "color": "#3b4a8f",
+   "brightness": 0.32,
+   "motion": 0.15,
+   "framing": "wide",
+   "subject": "place",
+   "camera": "static",
+   "hint": "Feet or wheels moving"
+  },
+  {
+   "index": 7,
+   "start": 6.094,
+   "end": 6.563,
+   "color": "#5a3d8a",
+   "brightness": 0.36,
+   "motion": 0.2,
+   "framing": "medium",
+   "subject": "person",
+   "camera": "pan",
+   "hint": "Light through a window"
+  },
+  {
+   "index": 8,
+   "start": 6.563,
+   "end": 7.031,
+   "color": "#e2563a",
+   "brightness": 0.62,
+   "motion": 0.8,
+   "framing": "close",
+   "subject": "object",
+   "camera": "handheld",
+   "hint": "Hands doing something"
+  },
+  {
+   "index": 9,
+   "start": 7.031,
+   "end": 7.5,
+   "color": "#f2b138",
+   "brightness": 0.7,
+   "motion": 0.75,
+   "framing": "medium",
+   "subject": "person",
+   "camera": "handheld",
+   "hint": "Street from above"
+  },
+  {
+   "index": 10,
+   "start": 7.5,
+   "end": 7.969,
+   "color": "#2fb7c9",
+   "brightness": 0.55,
+   "motion": 0.85,
+   "framing": "wide",
+   "subject": "place",
+   "camera": "pan",
+   "hint": "Crowd or traffic"
+  },
+  {
+   "index": 11,
+   "start": 7.969,
+   "end": 8.438,
+   "color": "#d9467a",
+   "brightness": 0.5,
+   "motion": 0.7,
+   "framing": "close",
+   "subject": "person",
+   "camera": "handheld",
+   "hint": "Turn toward the camera"
+  },
+  {
+   "index": 12,
+   "start": 8.438,
+   "end": 8.906,
+   "color": "#3b4a8f",
+   "brightness": 0.32,
+   "motion": 0.15,
+   "framing": "wide",
+   "subject": "place",
+   "camera": "static",
+   "hint": "Sky, quick"
+  },
+  {
+   "index": 13,
+   "start": 8.906,
+   "end": 9.375,
+   "color": "#5a3d8a",
+   "brightness": 0.36,
+   "motion": 0.2,
+   "framing": "medium",
+   "subject": "person",
+   "camera": "pan",
+   "hint": "Door or gate opening"
+  },
+  {
+   "index": 14,
+   "start": 9.375,
+   "end": 9.609,
+   "color": "#e2563a",
+   "brightness": 0.62,
+   "motion": 0.8,
+   "framing": "close",
+   "subject": "object",
+   "camera": "handheld",
+   "hint": "Jump or step"
+  },
+  {
+   "index": 15,
+   "start": 9.609,
+   "end": 9.844,
+   "color": "#f2b138",
+   "brightness": 0.7,
+   "motion": 0.75,
+   "framing": "medium",
+   "subject": "person",
+   "camera": "handheld",
+   "hint": "Glass, mirror or water"
+  },
+  {
+   "index": 16,
+   "start": 9.844,
+   "end": 10.078,
+   "color": "#2fb7c9",
+   "brightness": 0.55,
+   "motion": 0.85,
+   "framing": "wide",
+   "subject": "place",
+   "camera": "pan",
+   "hint": "Fast walk past"
+  },
+  {
+   "index": 17,
+   "start": 10.078,
+   "end": 10.313,
+   "color": "#d9467a",
+   "brightness": 0.5,
+   "motion": 0.7,
+   "framing": "close",
+   "subject": "person",
+   "camera": "handheld",
+   "hint": "A laugh"
+  },
+  {
+   "index": 18,
+   "start": 10.313,
+   "end": 11.25,
+   "color": "#3b4a8f",
+   "brightness": 0.32,
+   "motion": 0.15,
+   "framing": "wide",
+   "subject": "place",
+   "camera": "static",
+   "hint": "Wide closer, hold it"
+  }
+ ],
+ "texts": [
+  {
+   "text": "wait for it",
+   "start": 0,
+   "end": 3.75,
+   "position": "top",
+   "size": "medium"
+  }
+ ],
+ "tags": [
+  "music",
+  "energetic",
+  "montage"
+ ],
+ "labeledBy": "Twincut"
+}

@@ -1,0 +1,239 @@
+{
+ "version": 1,
+ "id": "starter-sixteen",
+ "title": "Sixteen cuts",
+ "source": {
+  "kind": "starter",
+  "platform": null
+ },
+ "duration": 8,
+ "aspect": {
+  "width": 1080,
+  "height": 1920
+ },
+ "pace": "rapid",
+ "tempo": {
+  "bpm": 120,
+  "confidence": 1
+ },
+ "beats": [
+  0,
+  0.5,
+  1,
+  1.5,
+  2,
+  2.5,
+  3,
+  3.5,
+  4,
+  4.5,
+  5,
+  5.5,
+  6,
+  6.5,
+  7,
+  7.5
+ ],
+ "onBeat": 1,
+ "shots": [
+  {
+   "index": 0,
+   "start": 0,
+   "end": 0.5,
+   "color": "#e4563f",
+   "brightness": 0.55,
+   "motion": 0.7,
+   "framing": "close",
+   "subject": "object",
+   "camera": "handheld",
+   "hint": "Detail, quick"
+  },
+  {
+   "index": 1,
+   "start": 0.5,
+   "end": 1,
+   "color": "#3fa7e4",
+   "brightness": 0.6,
+   "motion": 0.6,
+   "framing": "medium",
+   "subject": "person",
+   "camera": "handheld",
+   "hint": "Movement, quick"
+  },
+  {
+   "index": 2,
+   "start": 1,
+   "end": 1.5,
+   "color": "#e4c63f",
+   "brightness": 0.7,
+   "motion": 0.65,
+   "framing": "wide",
+   "subject": "place",
+   "camera": "pan",
+   "hint": "Wide scene, quick"
+  },
+  {
+   "index": 3,
+   "start": 1.5,
+   "end": 2,
+   "color": "#9b5be4",
+   "brightness": 0.45,
+   "motion": 0.7,
+   "framing": "close",
+   "subject": "person",
+   "camera": "handheld",
+   "hint": "Hands, quick"
+  },
+  {
+   "index": 4,
+   "start": 2,
+   "end": 2.5,
+   "color": "#e4563f",
+   "brightness": 0.55,
+   "motion": 0.7,
+   "framing": "close",
+   "subject": "object",
+   "camera": "handheld",
+   "hint": "Sign or text, quick"
+  },
+  {
+   "index": 5,
+   "start": 2.5,
+   "end": 3,
+   "color": "#3fa7e4",
+   "brightness": 0.6,
+   "motion": 0.6,
+   "framing": "medium",
+   "subject": "person",
+   "camera": "handheld",
+   "hint": "Feet, quick"
+  },
+  {
+   "index": 6,
+   "start": 3,
+   "end": 3.5,
+   "color": "#e4c63f",
+   "brightness": 0.7,
+   "motion": 0.65,
+   "framing": "wide",
+   "subject": "place",
+   "camera": "pan",
+   "hint": "Sky, quick"
+  },
+  {
+   "index": 7,
+   "start": 3.5,
+   "end": 4,
+   "color": "#9b5be4",
+   "brightness": 0.45,
+   "motion": 0.7,
+   "framing": "close",
+   "subject": "person",
+   "camera": "handheld",
+   "hint": "Face, quick"
+  },
+  {
+   "index": 8,
+   "start": 4,
+   "end": 4.5,
+   "color": "#e4563f",
+   "brightness": 0.55,
+   "motion": 0.7,
+   "framing": "close",
+   "subject": "object",
+   "camera": "handheld",
+   "hint": "Food or drink, quick"
+  },
+  {
+   "index": 9,
+   "start": 4.5,
+   "end": 5,
+   "color": "#3fa7e4",
+   "brightness": 0.6,
+   "motion": 0.6,
+   "framing": "medium",
+   "subject": "person",
+   "camera": "handheld",
+   "hint": "Door, quick"
+  },
+  {
+   "index": 10,
+   "start": 5,
+   "end": 5.5,
+   "color": "#e4c63f",
+   "brightness": 0.7,
+   "motion": 0.65,
+   "framing": "wide",
+   "subject": "place",
+   "camera": "pan",
+   "hint": "Reflection, quick"
+  },
+  {
+   "index": 11,
+   "start": 5.5,
+   "end": 6,
+   "color": "#9b5be4",
+   "brightness": 0.45,
+   "motion": 0.7,
+   "framing": "close",
+   "subject": "person",
+   "camera": "handheld",
+   "hint": "Light, quick"
+  },
+  {
+   "index": 12,
+   "start": 6,
+   "end": 6.5,
+   "color": "#e4563f",
+   "brightness": 0.55,
+   "motion": 0.7,
+   "framing": "close",
+   "subject": "object",
+   "camera": "handheld",
+   "hint": "Street, quick"
+  },
+  {
+   "index": 13,
+   "start": 6.5,
+   "end": 7,
+   "color": "#3fa7e4",
+   "brightness": 0.6,
+   "motion": 0.6,
+   "framing": "medium",
+   "subject": "person",
+   "camera": "handheld",
+   "hint": "Turn, quick"
+  },
+  {
+   "index": 14,
+   "start": 7,
+   "end": 7.5,
+   "color": "#e4c63f",
+   "brightness": 0.7,
+   "motion": 0.65,
+   "framing": "wide",
+   "subject": "place",
+   "camera": "pan",
+   "hint": "Close-up, quick"
+  },
+  {
+   "index": 15,
+   "start": 7.5,
+   "end": 8,
+   "color": "#9b5be4",
+   "brightness": 0.45,
+   "motion": 0.7,
+   "framing": "close",
+   "subject": "person",
+   "camera": "handheld",
+   "hint": "Wide closer, quick"
+  }
+ ],
+ "texts": [],
+ "tags": [
+  "fast",
+  "montage",
+  "trend"
+ ],
+ "labeledBy": "Twincut"
+}

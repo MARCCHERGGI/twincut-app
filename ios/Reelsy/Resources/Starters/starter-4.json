@@ -1,0 +1,119 @@
+{
+ "version": 1,
+ "id": "starter-slow",
+ "title": "Slow and cinematic",
+ "source": {
+  "kind": "starter",
+  "platform": null
+ },
+ "duration": 15,
+ "aspect": {
+  "width": 1080,
+  "height": 1920
+ },
+ "pace": "slow",
+ "tempo": {
+  "bpm": 80,
+  "confidence": 1
+ },
+ "beats": [
+  0,
+  0.75,
+  1.5,
+  2.25,
+  3,
+  3.75,
+  4.5,
+  5.25,
+  6,
+  6.75,
+  7.5,
+  8.25,
+  9,
+  9.75,
+  10.5,
+  11.25,
+  12,
+  12.75,
+  13.5,
+  14.25
+ ],
+ "onBeat": 1,
+ "shots": [
+  {
+   "index": 0,
+   "start": 0,
+   "end": 3,
+   "color": "#2f4b5c",
+   "brightness": 0.3,
+   "motion": 0.2,
+   "framing": "wide",
+   "subject": "place",
+   "camera": "pan",
+   "hint": "Wide landscape, slow pan"
+  },
+  {
+   "index": 1,
+   "start": 3,
+   "end": 6,
+   "color": "#6b5444",
+   "brightness": 0.35,
+   "motion": 0.15,
+   "framing": "medium",
+   "subject": "person",
+   "camera": "tracking",
+   "hint": "Figure in the frame"
+  },
+  {
+   "index": 2,
+   "start": 6,
+   "end": 9,
+   "color": "#a8794d",
+   "brightness": 0.5,
+   "motion": 0.1,
+   "framing": "close",
+   "subject": "object",
+   "camera": "static",
+   "hint": "Still detail, soft light"
+  },
+  {
+   "index": 3,
+   "start": 9,
+   "end": 12,
+   "color": "#3d5c4a",
+   "brightness": 0.32,
+   "motion": 0.2,
+   "framing": "wide",
+   "subject": "place",
+   "camera": "tracking",
+   "hint": "Moving through space"
+  },
+  {
+   "index": 4,
+   "start": 12,
+   "end": 15,
+   "color": "#1f2433",
+   "brightness": 0.2,
+   "motion": 0.1,
+   "framing": "wide",
+   "subject": "place",
+   "camera": "static",
+   "hint": "Quiet closing shot"
+  }
+ ],
+ "texts": [
+  {
+   "text": "take it slow",
+   "start": 0.375,
+   "end": 3,
+   "position": "bottom",
+   "size": "small"
+  }
+ ],
+ "tags": [
+  "cinematic",
+  "calm",
+  "travel"
+ ],
+ "labeledBy": "Twincut"
+}

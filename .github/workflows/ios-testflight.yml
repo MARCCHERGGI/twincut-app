@@ -1,0 +1,95 @@
+name: TestFlight upload
+
+on:
+  workflow_dispatch:
+    inputs:
+      runner:
+        description: "macOS runner label (Apple-chip runners stall when GitHub is short on capacity)"
+        default: macos-26
+
+jobs:
+  upload:
+    runs-on: ${{ inputs.runner || 'macos-26' }}
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select newest Xcode
+        run: |
+          XC=$(ls -d /Applications/Xcode_26*.app | grep -v -i beta | sort -V | tail -1)
+          sudo xcode-select -s "$XC"
+          xcodebuild -version
+
+      - name: Generate project
+        run: |
+          brew install xcodegen
+          cd ios && xcodegen generate
+
+      - name: Import signing certificate
+        env:
+          DIST_P12: ${{ secrets.DIST_P12 }}
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+        run: |
+          KEYCHAIN=$RUNNER_TEMP/build.keychain-db
+          KEYCHAIN_PASS=$(uuidgen)
+          security create-keychain -p "$KEYCHAIN_PASS" "$KEYCHAIN"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN"
+          security unlock-keychain -p "$KEYCHAIN_PASS" "$KEYCHAIN"
+          echo "$DIST_P12" | base64 --decode > $RUNNER_TEMP/dist.p12
+          security import $RUNNER_TEMP/dist.p12 -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN"
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASS" "$KEYCHAIN"
+          security list-keychain -d user -s "$KEYCHAIN" login.keychain
+
+      - name: Install provisioning profile
+        env:
+          PROVISION_APP: ${{ secrets.PROVISION_APP }}
+        run: |
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          echo "$PROVISION_APP" | base64 --decode > $RUNNER_TEMP/app.mobileprovision
+          UUID=$(security cms -D -i $RUNNER_TEMP/app.mobileprovision | plutil -extract UUID raw -o - -)
+          cp $RUNNER_TEMP/app.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/"$UUID".mobileprovision
+          echo "installed $UUID"
+
+      - name: Archive
+        run: |
+          cd ios
+          xcodebuild \
+            -project Reelsy.xcodeproj -scheme Reelsy \
+            -destination "generic/platform=iOS" \
+            -archivePath $RUNNER_TEMP/Twincut.xcarchive \
+            CURRENT_PROJECT_VERSION=${{ github.run_number }} \
+            archive > $RUNNER_TEMP/archive.log 2>&1 || { grep -E "error:|warning: .*(sign|profile)" $RUNNER_TEMP/archive.log | tail -50; exit 1; }
+          grep -c "CompileAssetCatalog" $RUNNER_TEMP/archive.log
+          ls $RUNNER_TEMP/Twincut.xcarchive/Products/Applications/Twincut.app | head -50
+
+      - name: Export and upload to TestFlight
+        env:
+          ASC_P8: ${{ secrets.ASC_P8 }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        run: |
+          echo "$ASC_P8" | base64 --decode > $RUNNER_TEMP/AuthKey.p8
+          cat > $RUNNER_TEMP/exportOptions.plist <<'PLIST'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>destination</key><string>upload</string>
+            <key>signingStyle</key><string>manual</string>
+            <key>teamID</key><string>83CD7B8K52</string>
+            <key>uploadSymbols</key><true/>
+            <key>provisioningProfiles</key>
+            <dict>
+              <key>com.marcohergi.reelsy</key><string>twincut-appstore</string>
+            </dict>
+          </dict>
+          </plist>
+          PLIST
+          xcodebuild -exportArchive \
+            -archivePath $RUNNER_TEMP/Twincut.xcarchive \
+            -exportOptionsPlist $RUNNER_TEMP/exportOptions.plist \
+            -exportPath $RUNNER_TEMP/export \
+            -authenticationKeyPath $RUNNER_TEMP/AuthKey.p8 \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID"

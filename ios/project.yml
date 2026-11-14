@@ -1,0 +1,78 @@
+name: Reelsy
+options:
+  bundleIdPrefix: com.marcohergi
+  deploymentTarget:
+    iOS: "18.0"
+  createIntermediateGroups: true
+  developmentLanguage: en
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    DEVELOPMENT_TEAM: 83CD7B8K52
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "1"
+    TARGETED_DEVICE_FAMILY: "1"
+    SUPPORTS_MACCATALYST: NO
+    SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD: NO
+    SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD: NO
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+targets:
+  Reelsy:
+    type: application
+    platform: iOS
+    sources:
+      - path: Reelsy
+        excludes:
+          - "**/*.md"
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.marcohergi.reelsy
+        PRODUCT_NAME: Twincut
+        PRODUCT_MODULE_NAME: Reelsy
+        INFOPLIST_FILE: Reelsy/Info.plist
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        ENABLE_PREVIEWS: YES
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGN_IDENTITY: "Apple Distribution"
+        PROVISIONING_PROFILE_SPECIFIER: twincut-appstore
+        TARGETED_DEVICE_FAMILY: "1"
+  ReelsyTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: ReelsyTests
+    dependencies:
+      - target: Reelsy
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: com.marcohergi.reelsy.tests
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Twincut.app/Twincut"
+        BUNDLE_LOADER: "$(TEST_HOST)"
+  ReelsyUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: ReelsyUITests
+    dependencies:
+      - target: Reelsy
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: com.marcohergi.reelsy.uitests
+        TEST_TARGET_NAME: Reelsy
+schemes:
+  Reelsy:
+    build:
+      targets:
+        Reelsy: all
+        ReelsyTests: [test]
+        ReelsyUITests: [test]
+    test:
+      config: Debug
+      targets:
+        - ReelsyTests
+        - ReelsyUITests
+    archive:
+      config: Release

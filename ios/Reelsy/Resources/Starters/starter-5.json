@@ -1,0 +1,78 @@
+{
+ "version": 1,
+ "id": "starter-before-after",
+ "title": "Before and after",
+ "source": {
+  "kind": "starter",
+  "platform": null
+ },
+ "duration": 6,
+ "aspect": {
+  "width": 1080,
+  "height": 1920
+ },
+ "pace": "slow",
+ "tempo": {
+  "bpm": 90,
+  "confidence": 1
+ },
+ "beats": [
+  0,
+  0.667,
+  1.333,
+  2,
+  2.667,
+  3.333,
+  4,
+  4.667,
+  5.333
+ ],
+ "onBeat": 1,
+ "shots": [
+  {
+   "index": 0,
+   "start": 0,
+   "end": 2.667,
+   "color": "#6b6b70",
+   "brightness": 0.4,
+   "motion": 0.2,
+   "framing": "medium",
+   "subject": "object",
+   "camera": "static",
+   "hint": "The before"
+  },
+  {
+   "index": 1,
+   "start": 2.667,
+   "end": 6,
+   "color": "#e4b83f",
+   "brightness": 0.65,
+   "motion": 0.35,
+   "framing": "medium",
+   "subject": "object",
+   "camera": "static",
+   "hint": "The after, same angle"
+  }
+ ],
+ "texts": [
+  {
+   "text": "before",
+   "start": 0,
+   "end": 2.667,
+   "position": "top",
+   "size": "large"
+  },
+  {
+   "text": "after",
+   "start": 2.667,
+   "end": 6,
+   "position": "top",
+   "size": "large"
+  }
+ ],
+ "tags": [
+  "transformation",
+  "reveal"
+ ],
+ "labeledBy": "Twincut"
+}

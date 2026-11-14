@@ -1,0 +1,108 @@
+name: ios
+
+on:
+  push:
+    branches: [main]
+    paths: ["ios/**", ".github/workflows/ios.yml"]
+  workflow_dispatch:
+    inputs:
+      runner:
+        description: "macOS runner label (Apple-chip runners stall when GitHub is short on capacity)"
+        default: macos-26
+
+jobs:
+  test:
+    runs-on: ${{ inputs.runner || 'macos-26' }}
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select newest Xcode
+        run: |
+          ls -d /Applications/Xcode*.app
+          XC=$(ls -d /Applications/Xcode_26*.app | grep -v -i beta | sort -V | tail -1)
+          sudo xcode-select -s "$XC"
+          xcodebuild -version
+          xcrun simctl list runtimes
+
+      - name: Generate project
+        run: |
+          brew install xcodegen
+          cd ios && xcodegen generate
+
+      - name: Boot simulator
+        id: sim
+        run: |
+          NAME=$(xcrun simctl list devices available | grep -oE "iPhone [0-9]+ Pro Max" | sort -V | tail -1)
+          echo "Using $NAME"
+          echo "name=$NAME" >> "$GITHUB_OUTPUT"
+          xcrun simctl boot "$NAME" || true
+          xcrun simctl bootstatus "$NAME" -b
+          xcrun simctl status_bar "$NAME" override --time "9:41" --dataNetwork wifi --wifiMode active --wifiBars 3 --cellularMode active --cellularBars 4 --batteryState charged --batteryLevel 100
+
+      - name: Build and test
+        run: |
+          mkdir -p build
+          # The app's own log (Log.swift), so a UI failure shows what the app did.
+          xcrun simctl spawn "${{ steps.sim.outputs.name }}" log stream --level debug             --predicate 'subsystem == "com.marcohergi.reelsy" OR (process == "Twincut" AND (messageType >= 16 OR composedMessage CONTAINS[c] "present"))'             > build/app.log 2>&1 &
+          cd ios
+          set +e
+          xcodebuild test \
+            -project Reelsy.xcodeproj -scheme Reelsy \
+            -destination "platform=iOS Simulator,name=${{ steps.sim.outputs.name }}" \
+            -resultBundlePath ../build/Tests.xcresult \
+            CODE_SIGNING_ALLOWED=NO > ../build/xcodebuild.log 2>&1
+          status=$?
+          grep -E "error:|warning: .*(Reelsy|Twincut)|Test Case .*(passed|failed)|Executed|TEST (SUCCEEDED|FAILED)|BUILD (SUCCEEDED|FAILED)" ../build/xcodebuild.log | tail -n 300
+          exit $status
+
+      - name: Smallest iPhone at largest text
+        if: always()
+        run: |
+          SMALL=$(python3 -c "import json,re,subprocess,sys; d=json.loads(subprocess.check_output(['xcrun','simctl','list','devices','available','-j']))['devices']; rt=sorted((k for k in d if 'iOS' in k), key=lambda k: [int(x) for x in re.findall(r'\d+', k)]); m=[x for k in reversed(rt) for x in d[k] if re.search(sys.argv[1], x['name'])]; print(m[0]['udid'] if m else '')" 'iPhone (SE \(3rd generation\)|1[0-9]e|1[0-9] mini)')
+          echo "Using $SMALL"
+          [ -n "$SMALL" ] || { echo "no small iPhone simulator on this image"; exit 1; }
+          xcrun simctl boot "$SMALL" || true
+          xcrun simctl bootstatus "$SMALL" -b
+          cd ios
+          set +e
+          xcodebuild test             -project Reelsy.xcodeproj -scheme Reelsy             -destination "id=$SMALL"             -only-testing:ReelsyUITests/ReelsyUITests/testLayoutAtLargestText             -resultBundlePath ../build/Small.xcresult             CODE_SIGNING_ALLOWED=NO > ../build/small.log 2>&1
+          status=$?
+          grep -E "error:|Test Case .*(passed|failed)|TEST (SUCCEEDED|FAILED)" ../build/small.log | tail -n 40
+          exit $status
+
+      - name: iPad (reviewers run iPhone apps there in compatibility mode)
+        if: always()
+        run: |
+          IPAD=$(python3 -c "import json,re,subprocess,sys; d=json.loads(subprocess.check_output(['xcrun','simctl','list','devices','available','-j']))['devices']; rt=sorted((k for k in d if 'iOS' in k), key=lambda k: [int(x) for x in re.findall(r'\d+', k)]); m=[x for k in reversed(rt) for x in d[k] if re.search(sys.argv[1], x['name'])]; print(m[0]['udid'] if m else '')" '^iPad (Air|Pro)')
+          echo "Using $IPAD"
+          [ -n "$IPAD" ] || { echo "no iPad simulator on this image"; exit 1; }
+          xcrun simctl boot "$IPAD" || true
+          xcrun simctl bootstatus "$IPAD" -b
+          cd ios
+          set +e
+          xcodebuild test             -project Reelsy.xcodeproj -scheme Reelsy             -destination "id=$IPAD"             -only-testing:ReelsyUITests/ReelsyUITests/testCopySampleReel             -only-testing:ReelsyUITests/ReelsyUITests/testSettingsOpenAndShowPolicyLinks             -resultBundlePath ../build/iPad.xcresult             CODE_SIGNING_ALLOWED=NO > ../build/ipad.log 2>&1
+          status=$?
+          grep -E "error:|Test Case .*(passed|failed)|TEST (SUCCEEDED|FAILED)" ../build/ipad.log | tail -n 40
+          exit $status
+
+      - name: Export screenshots
+        if: always()
+        run: |
+          xcrun xcresulttool export attachments --path build/Tests.xcresult --output-path build/shots || true
+          xcrun xcresulttool export attachments --path build/Small.xcresult --output-path build/shots-small || true
+          xcrun xcresulttool export attachments --path build/iPad.xcresult --output-path build/shots-ipad || true
+          ls -la build/shots build/shots-small build/shots-ipad || true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-output
+          path: |
+            build/xcodebuild.log
+            build/app.log
+            build/small.log
+            build/ipad.log
+            build/shots
+            build/shots-small
+            build/shots-ipad

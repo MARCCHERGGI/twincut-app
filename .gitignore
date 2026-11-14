@@ -1,0 +1,7 @@
+node_modules/
+build/
+ios/*.xcodeproj/
+.DS_Store
+*.xcuserstate
+.vercel
+server/.env*
