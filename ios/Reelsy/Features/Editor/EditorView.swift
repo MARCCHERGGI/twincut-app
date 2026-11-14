@@ -22,11 +22,8 @@ struct EditorView: View {
                 .layoutPriority(1)
             EditorTimeline(project: project) { slot = SlotRef(index: $0) }
                 .padding(.horizontal, 20)
-            Picker("Edit", selection: $tab) {
-                ForEach(Tab.allCases) { Text($0.rawValue).tag($0) }
-            }
-            .pickerStyle(.segmented)
-            .padding(.horizontal, 20)
+            ChoiceChips(options: Tab.allCases.map { ($0.rawValue, $0) }, selection: $tab)
+                .padding(.horizontal, 20)
             Group {
                 switch tab {
                 case .clips: ClipsPanel(project: project) { slot = SlotRef(index: $0) }
@@ -35,25 +32,22 @@ struct EditorView: View {
                 }
             }
             .frame(height: 190, alignment: .top)
+            Button("Export") {
+                guard model.exporting == nil else { return }
+                Log.export.notice("export tapped")
+                project.suspend()
+                model.exporting = ExportJob(projectID: project.id)
+            }
+            .buttonStyle(PrimaryButtonStyle())
+            .disabled(project.previewError != nil)
+            .accessibilityIdentifier("export-button")
+            .padding(.horizontal, 20)
+            .padding(.bottom, 8)
         }
         .padding(.top, 4)
         .background(Theme.bg.ignoresSafeArea())
         .navigationTitle(project.template.title)
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button("Export") {
-                    guard model.exporting == nil else { return }
-                    Log.export.notice("export tapped")
-                    project.suspend()
-                    model.exporting = ExportJob(projectID: project.id)
-                }
-                .fontWeight(.semibold)
-                .tint(Theme.accent)
-                .disabled(project.previewError != nil)
-                .accessibilityIdentifier("export-button")
-            }
-        }
         .task {
             if project.player.currentItem == nil { project.refresh() }
         }
@@ -220,12 +214,8 @@ private struct ClipsPanel: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Picker("Order", selection: $project.arrangement) {
-                Text("Best match").tag(Arrangement.smart)
-                Text("Your order").tag(Arrangement.order)
-            }
-            .pickerStyle(.segmented)
-            .padding(.horizontal, 20)
+            ChoiceChips(options: [("Best match", Arrangement.smart), ("Your order", .order)], selection: $project.arrangement)
+                .padding(.horizontal, 20)
             ScrollView(.horizontal) {
                 HStack(spacing: 10) {
                     ForEach(Array(project.clips.enumerated()), id: \.element.id) { i, clip in
@@ -284,26 +274,15 @@ struct ClipThumb: View {
 
 private struct TextPanel: View {
     @Bindable var project: ReelProject
-    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
                 if !project.captions.isEmpty {
-                    let current = project.captions.first?.style ?? .clean
-                    let layout = dynamicTypeSize.isAccessibilitySize
-                        ? AnyLayout(VStackLayout(alignment: .leading, spacing: 8))
-                        : AnyLayout(HStackLayout(spacing: 8))
-                    layout {
-                        ForEach(CaptionStyle.allCases) { style in
-                            Button(style.label) {
-                                for i in project.captions.indices { project.captions[i].style = style }
-                            }
-                            .buttonStyle(PillButtonStyle(filled: style == current))
-                            .accessibilityAddTraits(style == current ? .isSelected : [])
-                            .accessibilityLabel("\(style.label) captions")
-                        }
-                    }
+                    ChoiceChips(options: CaptionStyle.allCases.map { ($0.label, $0) }, selection: Binding(
+                        get: { project.captions.first?.style ?? .clean },
+                        set: { style in for i in project.captions.indices { project.captions[i].style = style } }
+                    ))
                 }
                 ForEach($project.captions) { $caption in
                     HStack(spacing: 10) {
@@ -354,6 +333,12 @@ private struct TextPanel: View {
 private struct SoundPanel: View {
     @Bindable var project: ReelProject
 
+    private var soundOptions: [(label: String, value: SoundMode)] {
+        var options: [(label: String, value: SoundMode)] = [("Clips", .clips), ("Off", .off)]
+        if project.beat != nil { options.insert(("Beat", .beat), at: 0) }
+        return options
+    }
+
     private var soundNote: String {
         switch project.sound {
         case .beat: "A beat Twincut makes for this edit. It hits on every beat the cuts follow, and it's yours to post anywhere."
@@ -364,15 +349,7 @@ private struct SoundPanel: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Picker("Sound", selection: $project.sound) {
-                if project.beat != nil {
-                    Text("Beat").tag(SoundMode.beat)
-                }
-                Text("Clips").tag(SoundMode.clips)
-                Text("Off").tag(SoundMode.off)
-            }
-            .pickerStyle(.segmented)
-            .accessibilityIdentifier("sound-picker")
+            ChoiceChips(options: soundOptions, selection: $project.sound)
             Text(soundNote)
                 .font(.subheadline)
                 .foregroundStyle(Theme.text2)
@@ -453,14 +430,10 @@ struct SlotSheet: View {
 
                 VStack(alignment: .leading, spacing: 8) {
                     SectionLabel(text: "Framing")
-                    Picker("Framing", selection: Binding(
+                    ChoiceChips(options: [("Fill the frame", FillMode.fill), ("Show it all", .fit)], selection: Binding(
                         get: { clip.fill },
                         set: { project.setFill($0, forClip: seg.clipIndex) }
-                    )) {
-                        Text("Fill the frame").tag(FillMode.fill)
-                        Text("Show it all").tag(FillMode.fit)
-                    }
-                    .pickerStyle(.segmented)
+                    ))
                 }
 
                 VStack(spacing: 10) {
