@@ -57,7 +57,7 @@ jobs:
             -project Reelsy.xcodeproj -scheme Reelsy \
             -destination "generic/platform=iOS" \
             -archivePath $RUNNER_TEMP/Twincut.xcarchive \
-            CURRENT_PROJECT_VERSION=${{ github.run_number }} \
+            CURRENT_PROJECT_VERSION=$(date -u +%y%m%d%H%M) \
             archive > $RUNNER_TEMP/archive.log 2>&1 || { grep -E "error:|warning: .*(sign|profile)" $RUNNER_TEMP/archive.log | tail -50; exit 1; }
           grep -c "CompileAssetCatalog" $RUNNER_TEMP/archive.log
           ls $RUNNER_TEMP/Twincut.xcarchive/Products/Applications/Twincut.app | head -50
