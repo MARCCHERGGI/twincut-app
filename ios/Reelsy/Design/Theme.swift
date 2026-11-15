@@ -45,16 +45,17 @@ struct PrimaryButtonStyle: ButtonStyle {
 }
 
 /// A row of choices that grows with Dynamic Type, which a segmented control doesn't.
-/// Side by side when they fit, stacked when they don't.
+/// Stacked at accessibility sizes; one layout either way, so each chip keeps its identity as text grows.
 struct ChoiceChips<Value: Hashable>: View {
     let options: [(label: String, value: Value)]
     @Binding var selection: Value
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
-        ViewThatFits(in: .horizontal) {
-            HStack(spacing: 8) { chips }
-            VStack(spacing: 8) { chips }
-        }
+        let layout = dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(spacing: 8))
+            : AnyLayout(HStackLayout(spacing: 8))
+        layout { chips }
     }
 
     private var chips: some View {
@@ -63,7 +64,7 @@ struct ChoiceChips<Value: Hashable>: View {
             let selected = option.value == selection
             Button { selection = option.value } label: {
                 Text(option.label)
-                    .fixedSize()
+                    .multilineTextAlignment(.center)
                     .frame(maxWidth: .infinity, minHeight: 44)
             }
             .buttonStyle(PillButtonStyle(filled: selected))
