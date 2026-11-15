@@ -37,6 +37,13 @@ struct ExportView: View {
             }
         }
         .background(Theme.bg.ignoresSafeArea())
+        .alert("Leave without saving?", isPresented: $confirmLeave) {
+            Button("Save to Photos") { Task { await save(); if saved { onDone() } } }
+            Button("Leave without saving", role: .destructive) { onDone() }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This reel isn't in Photos yet. Leaving closes the editor.")
+        }
         .task(id: attempt) { if error == nil { await render() } }
         .onChange(of: scenePhase) { _, phase in
             guard phase == .background, output == nil, error == nil else { return }
@@ -128,13 +135,6 @@ struct ExportView: View {
                 }
                 .font(.headline)
                 .accessibilityIdentifier("done-button")
-                .alert("Leave without saving?", isPresented: $confirmLeave) {
-                    Button("Save to Photos") { Task { await save(); if saved { onDone() } } }
-                    Button("Leave without saving", role: .destructive) { onDone() }
-                    Button("Cancel", role: .cancel) {}
-                } message: {
-                    Text("This reel isn't in Photos yet. Leaving closes the editor.")
-                }
             }
             .padding(.horizontal, 20)
             .padding(.top, 8)

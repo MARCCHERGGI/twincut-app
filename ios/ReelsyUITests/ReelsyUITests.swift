@@ -143,7 +143,8 @@ final class ReelsyUITests: XCTestCase {
         func audit(_ screen: String) throws {
             sleep(2)  // let the push or tab animation finish
             try app.performAccessibilityAudit { issue in
-                let element = issue.element.map { "\($0.elementType.rawValue) '\($0.label)' id=\($0.identifier)" } ?? "no element"
+                // An element can leave the screen before it's described; the issue still counts.
+                let element = issue.element.map { $0.exists ? "\($0.elementType.rawValue) '\($0.label)' id=\($0.identifier)" : "element gone" } ?? "no element"
                 issues.append("\(screen): \(issue.compactDescription) [\(element)]")
                 return true
             }
