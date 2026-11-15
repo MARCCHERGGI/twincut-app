@@ -178,7 +178,7 @@ struct WhatToCopyView: View {
     @Environment(\.dismiss) private var dismiss
 
     private let steps: [(app: String, icon: String, text: String)] = [
-        ("Your own videos", "person.crop.square", "Any video in Photos or Files works: your posts, drafts and edits."),
+        ("Your own videos", "person.crop.square", "Videos in Photos or Files work: your posts, drafts and edits."),
         ("Someone else's video", "person.2", "Only when you have the right to use it, like a creator who shares an edit for others to use."),
     ]
 

@@ -218,7 +218,7 @@ final class ReelsyUITests: XCTestCase {
         XCTAssertEqual(saved.count, 1, "reading the sample twice keeps one template")
     }
 
-    /// Links from any app: plain text gets a hint, a page link explains how to save the video,
+    /// Links from any app: plain text gets a hint, a video-app link offers a saved video instead,
     /// a direct video link is downloaded and read like any other video.
     func testPastedLinks() throws {
         let next = app.buttons["onboarding-next"]
@@ -234,10 +234,9 @@ final class ReelsyUITests: XCTestCase {
         field.tap()
         field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 12))  // the rejected text stays for editing
         field.typeText("https://www.youtube.com/shorts/abc123\n")
-        let open = app.buttons["open-in-app"]
-        XCTAssertTrue(open.waitForExistence(timeout: 20), "a page link opens the how-to sheet")
-        let named = app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS %@", "Open the link in YouTube"))
-        XCTAssertTrue(named.firstMatch.exists, "the sheet names where the link goes")
+        let open = app.buttons["pick-saved-video"]
+        XCTAssertTrue(open.waitForExistence(timeout: 20), "a video-app link opens the pick-a-saved-video sheet")
+        XCTAssertEqual(app.staticTexts["link-sheet-reason"].label, "Twincut doesn't take videos from YouTube.")
         sleep(1)
         shot("10-page-link")
         app.buttons["close-link-sheet"].tap()

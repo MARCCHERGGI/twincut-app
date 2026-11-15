@@ -2,7 +2,8 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 /// A link the user pasted, from any app or website. Twincut downloads a link only when it points
-/// straight at a video file; a page link is opened so the user can save the video there.
+/// straight at a video file off the big video apps (5.2.3: no media from third-party sources);
+/// for anything else it asks the user to pick a video saved on the device.
 struct VideoLink: Identifiable, Equatable {
     let url: URL
     var id: URL { url }
@@ -28,19 +29,36 @@ struct VideoLink: Identifiable, Equatable {
         ["mp4", "mov", "m4v"].contains(url.pathExtension.lowercased())
     }
 
-    /// Where the link goes, for buttons like "Open in YouTube": a known app's name, otherwise the site.
+    /// Where the link goes: a video app's name, otherwise the site.
     var siteName: String {
+        if let platform { return platform }
         let host = (url.host() ?? "").lowercased()
-        let known: [(String, String)] = [
-            ("tiktok.com", "TikTok"), ("instagram.com", "Instagram"), ("instagr.am", "Instagram"),
-            ("youtube.com", "YouTube"), ("youtu.be", "YouTube"), ("facebook.com", "Facebook"),
-            ("fb.watch", "Facebook"), ("x.com", "X"), ("twitter.com", "X"), ("snapchat.com", "Snapchat"),
-            ("threads.net", "Threads"), ("threads.com", "Threads"), ("pinterest.com", "Pinterest"),
-            ("pin.it", "Pinterest"), ("vimeo.com", "Vimeo"), ("linkedin.com", "LinkedIn"), ("reddit.com", "Reddit"),
-        ]
-        if let name = known.first(where: { host == $0.0 || host.hasSuffix("." + $0.0) })?.1 { return name }
         return host.hasPrefix("www.") ? String(host.dropFirst(4)) : host
     }
+
+    /// The video app this link belongs to, including the servers it streams its videos from.
+    /// Twincut never fetches from these: their videos aren't the user's to download.
+    var platform: String? {
+        let host = (url.host() ?? "").lowercased()
+        return Self.platforms.first { $0.domains.contains { host == $0 || host.hasSuffix("." + $0) } }?.name
+    }
+
+    private static let platforms: [(name: String, domains: [String])] = [
+        ("TikTok", ["tiktok.com", "tiktokcdn.com", "tiktokcdn-us.com", "tiktokv.com", "ibytedtos.com", "byteoversea.com", "muscdn.com"]),
+        ("Instagram", ["instagram.com", "instagr.am", "cdninstagram.com"]),
+        ("Facebook", ["facebook.com", "fb.watch", "fb.com", "fbcdn.net"]),
+        ("Threads", ["threads.net", "threads.com"]),
+        ("YouTube", ["youtube.com", "youtu.be", "youtube-nocookie.com", "googlevideo.com", "ytimg.com"]),
+        ("X", ["x.com", "twitter.com", "twimg.com", "t.co"]),
+        ("Snapchat", ["snapchat.com", "sc-cdn.net", "snap.com"]),
+        ("Pinterest", ["pinterest.com", "pin.it", "pinimg.com"]),
+        ("Vimeo", ["vimeo.com", "vimeocdn.com"]),
+        ("LinkedIn", ["linkedin.com", "licdn.com", "lnkd.in"]),
+        ("Reddit", ["reddit.com", "redd.it", "redditmedia.com"]),
+        ("Twitch", ["twitch.tv", "ttvnw.net"]),
+        ("Dailymotion", ["dailymotion.com", "dai.ly", "dmcdn.net"]),
+        ("Tumblr", ["tumblr.com"]),
+    ]
 }
 
 /// The link box on Home: type or paste a link, or tap Paste.
@@ -143,38 +161,34 @@ struct PasteLinkBox: View {
     }
 }
 
-/// After pasting a link to a page: open it, save the video there, come back.
+/// After pasting a link that isn't a video file Twincut may fetch: pick a saved video instead.
 struct GetVideoSheet: View {
     let link: VideoLink
     let onClose: () -> Void
-    let onOpen: () -> Void
     let onPickNow: () -> Void
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 22) {
-                Text("Save the video first")
+                Text("Use a video on this device")
                     .font(.title2.weight(.bold))
                     .padding(.top, 8)
-                Text("This link opens a page, not a video file. Twincut works with videos saved on this device.")
+                Text(link.platform.map { "Twincut doesn't take videos from \($0)." }
+                     ?? "This link opens a page on \(link.siteName), not a video file.")
+                    .font(.body)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityIdentifier("link-sheet-reason")
+                Text("Pick a video saved in Photos or Files that's yours or that you have the right to use. A link straight to a video file, like one from your own cloud drive, works too.")
                     .font(.subheadline)
                     .foregroundStyle(Theme.text2)
                     .fixedSize(horizontal: false, vertical: true)
-                VStack(alignment: .leading, spacing: 16) {
-                    step(1, "Open the link in \(link.siteName).")
-                    step(2, "If the video is yours or you have the right to use it, save it to this device there.")
-                    step(3, "Come back to Twincut. Your newest videos open on their own.")
-                }
                 Button {
-                    onOpen()
+                    onPickNow()
                 } label: {
-                    Label("Open link", systemImage: "arrow.up.right")
+                    Label("Choose a video", systemImage: "photo.on.rectangle")
                 }
                 .buttonStyle(PrimaryButtonStyle())
-                .accessibilityIdentifier("open-in-app")
-                Button("I already have it") { onPickNow() }
-                    .buttonStyle(LinkButtonStyle())
-                    .frame(maxWidth: .infinity)
+                .accessibilityIdentifier("pick-saved-video")
                 Button("Not now") { onClose() }
                     .buttonStyle(LinkButtonStyle(color: Theme.text))
                     .frame(maxWidth: .infinity)

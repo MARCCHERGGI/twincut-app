@@ -36,6 +36,17 @@ final class VideoLinkTests: XCTestCase {
         XCTAssertNil(VideoLink(text: "mailto:someone@example.com"))
     }
 
+    func testVideoAppsAndTheirVideoServersAreNeverFetched() throws {
+        for text in ["https://v16-webapp.tiktokcdn.com/x/clip.mp4", "https://scontent.cdninstagram.com/v/a.mp4",
+                     "https://video.fbcdn.net/b.mp4", "https://rr3---sn-abc.googlevideo.com/videoplayback",
+                     "https://video.twimg.com/c.mp4", "https://player.vimeo.com/d.mp4", "https://www.tiktok.com/@a/video/1"] {
+            XCTAssertNotNil(try XCTUnwrap(VideoLink(text: text)).platform, text)
+        }
+        XCTAssertNil(try XCTUnwrap(VideoLink(text: "https://twincut.pages.dev/test/sample-reel.mp4")).platform)
+        XCTAssertNil(try XCTUnwrap(VideoLink(text: "https://notyoutube.com/a.mp4")).platform, "only the app's own domains")
+        XCTAssertEqual(VideoLink(text: "https://v16.tiktokcdn.com/a.mp4")?.siteName, "TikTok")
+    }
+
     func testVideoFileAddresses() throws {
         XCTAssertTrue(try XCTUnwrap(VideoLink(text: "https://cdn.example.com/a/B.MP4")).namesVideoFile)
         XCTAssertTrue(try XCTUnwrap(VideoLink(text: "https://example.com/take.mov?dl=1")).namesVideoFile)

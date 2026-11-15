@@ -13,14 +13,11 @@ struct HomeView: View {
     @State private var newTitle = ""
     @State private var checkingLink = false
     @State private var pageLink: VideoLink?
-    @State private var awaitingSave = false
     @State private var showPicker = false
     @State private var pickAfterSheet = false
     @State private var showFiles = false
     @State private var pickedFile: URL?
-    @Environment(\.scenePhase) private var scenePhase
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-    @Environment(\.openURL) private var openURL
 
     var body: some View {
         ScrollView {
@@ -63,19 +60,8 @@ struct HomeView: View {
             }
         }) { link in
             GetVideoSheet(link: link, onClose: { pageLink = nil }) {
-                awaitingSave = true
-                pageLink = nil
-                openURL(link.url)
-            } onPickNow: {
                 pickAfterSheet = true
                 pageLink = nil
-            }
-        }
-        // Back from the other app with the video saved: open the picker, newest first.
-        .onChange(of: scenePhase) { _, phase in
-            if phase == .active && awaitingSave {
-                awaitingSave = false
-                showPicker = true
             }
         }
         .photosPicker(isPresented: $showPicker, selection: $referenceItem, matching: .videos, preferredItemEncoding: .current)
@@ -125,9 +111,9 @@ struct HomeView: View {
         VStack(alignment: .leading, spacing: 16) {
             HeroBars()
                 .frame(height: 70)
-            Text("Copy any video's edit")
+            Text("Copy a video's edit")
                 .scaledFont(28, .bold, relativeTo: .title)
-            Text("Pick a video or paste a link from any app. Twincut finds every cut, the beat and where the captions sit, without uploading anything.")
+            Text("Pick a video you saved, or paste a link to a video file. Twincut finds every cut, the beat and where the captions sit, without uploading anything.")
                 .font(.subheadline)
                 .foregroundStyle(Theme.text2)
                 .fixedSize(horizontal: false, vertical: true)

@@ -93,7 +93,7 @@ struct TemplateView: View {
                 if !template.beats.isEmpty, template.shots.count > 1, template.source.kind != "starter" {
                     StatChip(text: "\(Int((template.onBeat * 100).rounded()))% on beat")
                 }
-                if !template.texts.isEmpty { StatChip(text: "\(template.texts.count) captions") }
+                if !template.texts.isEmpty { StatChip(text: template.texts.count == 1 ? "1 caption" : "\(template.texts.count) captions") }
             }
         }
         .scrollIndicators(.hidden)

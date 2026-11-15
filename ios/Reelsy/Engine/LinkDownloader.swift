@@ -5,11 +5,12 @@ import Foundation
 /// video is kept.
 enum LinkDownloader {
     enum Failure: LocalizedError {
-        case notAVideo, tooBig, unreachable, noRoom
+        case notAVideo, platform, tooBig, unreachable, noRoom
 
         var errorDescription: String? {
             switch self {
-            case .notAVideo: "That link isn't a video file. Save the video to this device, then pick it."
+            case .notAVideo: "That link isn't a video file. Pick a video saved on this device."
+            case .platform: "Twincut doesn't take videos from video apps. Pick a video saved on this device."
             case .tooBig: "That video is over 1 GB. Trim it or pick a shorter one."
             case .unreachable: "Couldn't reach that link. Check your connection and try again."
             case .noRoom: "Your device is almost out of space. Free up some room and try again."
@@ -21,6 +22,7 @@ enum LinkDownloader {
 
     /// Whether `link` points straight at a video file, asking the server when it answers quickly.
     static func pointsAtVideo(_ link: VideoLink) async -> Bool {
+        guard link.platform == nil else { return false }  // not even asked
         var request = URLRequest(url: link.url, timeoutInterval: 8)
         request.httpMethod = "HEAD"
         guard let answer = try? await URLSession.shared.data(for: request),
@@ -31,6 +33,7 @@ enum LinkDownloader {
 
     /// Downloads the video into the clip cache and returns its file URL.
     static func download(_ link: VideoLink) async throws -> URL {
+        guard link.platform == nil else { throw Failure.platform }
         // Refuse an oversized file before fetching it when the server says how big it is.
         var head = URLRequest(url: link.url, timeoutInterval: 8)
         head.httpMethod = "HEAD"
