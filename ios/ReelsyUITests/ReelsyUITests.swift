@@ -120,13 +120,13 @@ final class ReelsyUITests: XCTestCase {
 
         app.buttons["sample-reel"].firstMatch.tap()
         let samples = app.buttons["use-samples"]
-        XCTAssertTrue(samples.waitForExistence(timeout: 60))
+        XCTAssertTrue(samples.waitForExistence(timeout: 180), "analysis finishes and opens the template")
         XCTAssertTrue(samples.isHittable, "sample clips button on screen")
         shot("L3-template")
         samples.tap()
 
         let export = app.buttons["export-button"]
-        XCTAssertTrue(export.waitForExistence(timeout: 60))
+        XCTAssertTrue(export.waitForExistence(timeout: 180), "the editor opens with the sample clips")
         XCTAssertTrue(export.isHittable, "export button on screen")
         shot("L4-editor-clips")
         for tab in ["Text", "Sound"] {

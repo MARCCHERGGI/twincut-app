@@ -138,7 +138,8 @@ private struct CaptionOverlay: View {
         let time = project.currentTime
         GeometryReader { geo in
             ForEach(project.captions.filter { $0.shows(at: time) }) { caption in
-                CaptionView(caption: caption, frameWidth: width)
+                CaptionPicture(caption: caption, width: width)
+                    .equatable()
                     .position(x: geo.size.width / 2, y: geo.size.height * caption.position.y)
             }
         }
@@ -146,6 +147,22 @@ private struct CaptionOverlay: View {
         // Part of the video picture, sized to the frame like the export; the Text tab edits them.
         .accessibilityHidden(true)
     }
+}
+
+/// A caption drawn as the exact image the export burns into the video, so the preview
+/// matches it pixel for pixel and isn't app text that would follow Dynamic Type.
+private struct CaptionPicture: View, Equatable {
+    let caption: Caption
+    let width: CGFloat
+    @Environment(\.displayScale) private var scale
+
+    var body: some View {
+        if let image = CaptionRenderer.image(for: caption, frameWidth: width * scale) {
+            Image(decorative: image, scale: scale)
+        }
+    }
+
+    static func == (a: Self, b: Self) -> Bool { a.caption == b.caption && a.width == b.width }
 }
 
 struct PlayerLayerView: UIViewRepresentable {

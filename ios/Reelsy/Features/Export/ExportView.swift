@@ -127,13 +127,18 @@ struct ExportView: View {
             HStack {
                 Button("Edit") { onKeepEditing() }
                     .foregroundStyle(Theme.text2)
+                    .frame(minWidth: 44, minHeight: 44, alignment: .leading)
+                    .contentShape(Rectangle())
                 Spacer()
                 Text("Your reel").font(.headline)
                 Spacer()
                 Button("Done") {
+                    Log.export.notice("done tapped, saved: \(saved)")
                     if saved { onDone() } else { confirmLeave = true }
                 }
                 .font(.headline)
+                .frame(minWidth: 44, minHeight: 44, alignment: .trailing)
+                .contentShape(Rectangle())
                 .accessibilityIdentifier("done-button")
             }
             .padding(.horizontal, 20)
