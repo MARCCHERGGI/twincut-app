@@ -96,7 +96,7 @@ jobs:
           xcrun simctl boot "$IPAD" || true
           xcrun simctl bootstatus "$IPAD" -b
           # The app's own log on the iPad, so a step that does nothing shows whether the app saw the tap.
-          xcrun simctl spawn "$IPAD" log stream --level debug --predicate 'subsystem == "com.marcohergi.reelsy"' > ../build/ipad-app.log 2>&1 &
+          xcrun simctl spawn "$IPAD" log stream --level debug --predicate 'subsystem == "com.marcohergi.reelsy"' > build/ipad-app.log 2>&1 &
           cd ios
           set +e
           run_ipad() { rm -rf ../build/iPad.xcresult; xcodebuild test             -project Reelsy.xcodeproj -scheme Reelsy             -destination "id=$IPAD"             -only-testing:ReelsyUITests/ReelsyUITests/testCopySampleReel             -only-testing:ReelsyUITests/ReelsyUITests/testSettingsOpenAndShowPolicyLinks             -retry-tests-on-failure -test-iterations 2             -resultBundlePath ../build/iPad.xcresult             CODE_SIGNING_ALLOWED=NO > ../build/ipad.log 2>&1; }
