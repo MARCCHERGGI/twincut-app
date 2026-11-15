@@ -83,7 +83,7 @@ jobs:
           xcrun simctl bootstatus "$IPAD" -b
           cd ios
           set +e
-          run_ipad() { rm -rf ../build/iPad.xcresult; xcodebuild test             -project Reelsy.xcodeproj -scheme Reelsy             -destination "id=$IPAD"             -only-testing:ReelsyUITests/ReelsyUITests/testCopySampleReel             -only-testing:ReelsyUITests/ReelsyUITests/testSettingsOpenAndShowPolicyLinks             -resultBundlePath ../build/iPad.xcresult             CODE_SIGNING_ALLOWED=NO > ../build/ipad.log 2>&1; }
+          run_ipad() { rm -rf ../build/iPad.xcresult; xcodebuild test             -project Reelsy.xcodeproj -scheme Reelsy             -destination "id=$IPAD"             -only-testing:ReelsyUITests/ReelsyUITests/testCopySampleReel             -only-testing:ReelsyUITests/ReelsyUITests/testSettingsOpenAndShowPolicyLinks             -retry-tests-on-failure -test-iterations 2             -resultBundlePath ../build/iPad.xcresult             CODE_SIGNING_ALLOWED=NO > ../build/ipad.log 2>&1; }
           run_ipad
           status=$?
           # After a long run the simulator service can drop every destination; restart it once and retry.

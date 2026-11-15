@@ -13,25 +13,33 @@ struct EditorView: View {
 
     @State private var tab: Tab = .clips
     @State private var slot: SlotRef?
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         VStack(spacing: 14) {
             PreviewPane(project: project)
                 .frame(maxWidth: .infinity)
-                .frame(maxHeight: .infinity)
-                .layoutPriority(1)
-            EditorTimeline(project: project) { slot = SlotRef(index: $0) }
-                .padding(.horizontal, 20)
-            ChoiceChips(options: Tab.allCases.map { ($0.rawValue, $0) }, selection: $tab)
-                .padding(.horizontal, 20)
-            Group {
-                switch tab {
-                case .clips: ClipsPanel(project: project) { slot = SlotRef(index: $0) }
-                case .text: TextPanel(project: project)
-                case .sound: SoundPanel(project: project)
+                .containerRelativeFrame(.vertical) { height, _ in
+                    height * (dynamicTypeSize.isAccessibilitySize ? 0.3 : 0.45)
                 }
+            ScrollView {
+                VStack(spacing: 14) {
+                    EditorTimeline(project: project) { slot = SlotRef(index: $0) }
+                        .padding(.horizontal, 20)
+                    ChoiceChips(options: Tab.allCases.map { ($0.rawValue, $0) }, selection: $tab)
+                        .padding(.horizontal, 20)
+                    switch tab {
+                    case .clips: ClipsPanel(project: project) { slot = SlotRef(index: $0) }
+                    case .text: TextPanel(project: project)
+                    case .sound: SoundPanel(project: project)
+                    }
+                }
+                .padding(.bottom, 14)
             }
-            .frame(height: 190, alignment: .top)
+            .scrollDismissesKeyboard(.interactively)
+        }
+        .padding(.top, 4)
+        .safeAreaInset(edge: .bottom) {
             Button("Export") {
                 guard model.exporting == nil else { return }
                 Log.export.notice("export tapped")
@@ -42,9 +50,9 @@ struct EditorView: View {
             .disabled(project.previewError != nil)
             .accessibilityIdentifier("export-button")
             .padding(.horizontal, 20)
-            .padding(.bottom, 8)
+            .padding(.vertical, 8)
+            .background(Theme.bg.ignoresSafeArea())
         }
-        .padding(.top, 4)
         .background(Theme.bg.ignoresSafeArea())
         .navigationTitle(project.template.title)
         .navigationBarTitleDisplayMode(.inline)
@@ -276,57 +284,54 @@ private struct TextPanel: View {
     @Bindable var project: ReelProject
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 12) {
-                if !project.captions.isEmpty {
-                    ChoiceChips(options: CaptionStyle.allCases.map { ($0.label, $0) }, selection: Binding(
-                        get: { project.captions.first?.style ?? .clean },
-                        set: { style in for i in project.captions.indices { project.captions[i].style = style } }
-                    ))
-                }
-                ForEach($project.captions) { $caption in
-                    HStack(spacing: 10) {
-                        TextField("Write a caption", text: $caption.text, axis: .vertical)
-                            .lineLimit(1...3)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 10)
-                            .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Theme.raised))
-                            .accessibilityIdentifier("caption-field")
-                        Menu {
-                            Picker("Position", selection: $caption.position) {
-                                Text("Top").tag(Template.Position.top)
-                                Text("Middle").tag(Template.Position.middle)
-                                Text("Bottom").tag(Template.Position.bottom)
-                            }
-                            Picker("Size", selection: $caption.size) {
-                                Text("Small").tag(Template.Size.small)
-                                Text("Medium").tag(Template.Size.medium)
-                                Text("Large").tag(Template.Size.large)
-                            }
-                            Button("Jump to it", systemImage: "arrow.right.to.line") { project.seek(to: caption.start) }
-                            Button("Delete", systemImage: "trash", role: .destructive) {
-                                project.captions.removeAll { $0.id == caption.id }
-                            }
-                        } label: {
-                            Image(systemName: "ellipsis")
-                                .frame(width: 40, height: 40)
-                                .background(Circle().fill(Theme.raised))
-                        }
-                        .accessibilityLabel("Caption options")
-                    }
-                }
-                Button {
-                    let start = min(project.currentTime, max(0, project.template.duration - 1))
-                    project.captions.append(Caption(text: "", start: start, end: min(project.template.duration, start + 2.5), position: .middle, size: .medium, style: project.captions.first?.style ?? .clean))
-                } label: {
-                    Label("Add a caption here", systemImage: "plus")
-                }
-                .buttonStyle(PillButtonStyle())
-                .accessibilityIdentifier("add-caption")
+        VStack(alignment: .leading, spacing: 12) {
+            if !project.captions.isEmpty {
+                ChoiceChips(options: CaptionStyle.allCases.map { ($0.label, $0) }, selection: Binding(
+                    get: { project.captions.first?.style ?? .clean },
+                    set: { style in for i in project.captions.indices { project.captions[i].style = style } }
+                ))
             }
-            .padding(.horizontal, 20)
+            ForEach($project.captions) { $caption in
+                HStack(spacing: 10) {
+                    TextField("Write a caption", text: $caption.text, axis: .vertical)
+                        .lineLimit(1...3)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 10)
+                        .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Theme.raised))
+                        .accessibilityIdentifier("caption-field")
+                    Menu {
+                        Picker("Position", selection: $caption.position) {
+                            Text("Top").tag(Template.Position.top)
+                            Text("Middle").tag(Template.Position.middle)
+                            Text("Bottom").tag(Template.Position.bottom)
+                        }
+                        Picker("Size", selection: $caption.size) {
+                            Text("Small").tag(Template.Size.small)
+                            Text("Medium").tag(Template.Size.medium)
+                            Text("Large").tag(Template.Size.large)
+                        }
+                        Button("Jump to it", systemImage: "arrow.right.to.line") { project.seek(to: caption.start) }
+                        Button("Delete", systemImage: "trash", role: .destructive) {
+                            project.captions.removeAll { $0.id == caption.id }
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis")
+                            .frame(width: 40, height: 40)
+                            .background(Circle().fill(Theme.raised))
+                    }
+                    .accessibilityLabel("Caption options")
+                }
+            }
+            Button {
+                let start = min(project.currentTime, max(0, project.template.duration - 1))
+                project.captions.append(Caption(text: "", start: start, end: min(project.template.duration, start + 2.5), position: .middle, size: .medium, style: project.captions.first?.style ?? .clean))
+            } label: {
+                Label("Add a caption here", systemImage: "plus")
+            }
+            .buttonStyle(PillButtonStyle())
+            .accessibilityIdentifier("add-caption")
         }
-        .scrollDismissesKeyboard(.interactively)
+        .padding(.horizontal, 20)
     }
 }
 
