@@ -12,6 +12,21 @@ final class ReelsyUITests: XCTestCase {
         app.launch()
     }
 
+    /// Taps once the element has stopped moving. A pushed screen's buttons exist while it is still
+    /// sliding in, and taps during a transition are dropped; on the CI simulator (about 1 fps) the
+    /// slide takes seconds, on a phone a third of one.
+    private func tapWhenSettled(_ element: XCUIElement, timeout: TimeInterval = 30) {
+        var last = element.frame
+        let end = Date().addingTimeInterval(timeout)
+        while Date() < end {
+            Thread.sleep(forTimeInterval: 1)
+            let now = element.frame
+            if now == last && element.isHittable { break }
+            last = now
+        }
+        element.tap()
+    }
+
     private func shot(_ name: String) {
         let attachment = XCTAttachment(screenshot: app.screenshot())
         attachment.name = name
@@ -43,7 +58,7 @@ final class ReelsyUITests: XCTestCase {
         XCTAssertEqual(count.label, before)
         sleep(1)  // let the counter's number transition settle before the store screenshot
         shot("03-template")
-        samples.tap()
+        tapWhenSettled(samples)
 
         let export = app.buttons["export-button"]
         XCTAssertTrue(export.waitForExistence(timeout: 60))
@@ -89,7 +104,7 @@ final class ReelsyUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label ENDSWITH %@", " BPM")).firstMatch.exists, "tempo found")
         sleep(1)
         shot("08-sample-template")
-        samples.tap()
+        tapWhenSettled(samples)
 
         XCTAssertTrue(app.buttons["export-button"].waitForExistence(timeout: 180), "the editor opens with the sample clips")
         app.buttons["Sound"].tap()
@@ -123,7 +138,7 @@ final class ReelsyUITests: XCTestCase {
         XCTAssertTrue(samples.waitForExistence(timeout: 180), "analysis finishes and opens the template")
         XCTAssertTrue(samples.isHittable, "sample clips button on screen")
         shot("L3-template")
-        samples.tap()
+        tapWhenSettled(samples)
 
         let export = app.buttons["export-button"]
         XCTAssertTrue(export.waitForExistence(timeout: 180), "the editor opens with the sample clips")
@@ -162,7 +177,7 @@ final class ReelsyUITests: XCTestCase {
         // The template arrives as analysis ends; on a slow simulator its layout is still settling at 2 s,
         // and the audit then reports every element as not following Dynamic Type (11-15, ef49e8e).
         try audit("template", settle: 6)
-        app.buttons["use-samples"].tap()
+        tapWhenSettled(app.buttons["use-samples"])
 
         XCTAssertTrue(app.buttons["export-button"].waitForExistence(timeout: 60))
         for tab in ["Clips", "Text", "Sound"] {
@@ -178,7 +193,7 @@ final class ReelsyUITests: XCTestCase {
         XCTAssertTrue(next.waitForExistence(timeout: 10))
         next.tap(); next.tap(); next.tap()
         app.buttons["starter-card-0"].tap()
-        app.buttons["use-samples"].tap()
+        tapWhenSettled(app.buttons["use-samples"])
         let export = app.buttons["export-button"]
         XCTAssertTrue(export.waitForExistence(timeout: 60))
         export.tap()
