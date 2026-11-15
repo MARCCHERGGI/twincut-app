@@ -140,8 +140,8 @@ final class ReelsyUITests: XCTestCase {
     /// on every screen of the reviewer's path. Collects every issue, then fails listing them all.
     func testAccessibilityAuditOnEveryScreen() throws {
         var issues: [String] = []
-        func audit(_ screen: String) throws {
-            sleep(2)  // let the push or tab animation finish
+        func audit(_ screen: String, settle: UInt32 = 2) throws {
+            sleep(settle)  // let the push or tab animation finish
             try app.performAccessibilityAudit { issue in
                 // An element can leave the screen before it's described; the issue still counts.
                 let element = issue.element.map { $0.exists ? "\($0.elementType.rawValue) '\($0.label)' id=\($0.identifier)" : "element gone" } ?? "no element"
@@ -159,7 +159,9 @@ final class ReelsyUITests: XCTestCase {
 
         app.buttons["sample-reel"].firstMatch.tap()
         XCTAssertTrue(app.buttons["use-samples"].waitForExistence(timeout: 60))
-        try audit("template")
+        // The template arrives as analysis ends; on a slow simulator its layout is still settling at 2 s,
+        // and the audit then reports every element as not following Dynamic Type (11-15, ef49e8e).
+        try audit("template", settle: 6)
         app.buttons["use-samples"].tap()
 
         XCTAssertTrue(app.buttons["export-button"].waitForExistence(timeout: 60))

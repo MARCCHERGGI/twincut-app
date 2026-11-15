@@ -88,7 +88,7 @@ jobs:
 
       - name: iPad (reviewers run iPhone apps there in compatibility mode)
         if: always()
-        timeout-minutes: 30
+        timeout-minutes: 45
         run: |
           IPAD=$(python3 -c "import json,re,subprocess,sys; d=json.loads(subprocess.check_output(['xcrun','simctl','list','devices','available','-j']))['devices']; rt=sorted((k for k in d if 'iOS' in k), key=lambda k: [int(x) for x in re.findall(r'\d+', k)]); m=[x for k in reversed(rt) for x in d[k] if re.search(sys.argv[1], x['name'])]; print(m[0]['udid'] if m else '')" '^iPad (Air|Pro)')
           echo "Using $IPAD"
