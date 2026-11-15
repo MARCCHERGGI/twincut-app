@@ -156,7 +156,7 @@ struct GetVideoSheet: View {
                 Text("Save the video first")
                     .font(.title2.weight(.bold))
                     .padding(.top, 8)
-                Text("Twincut doesn't download from websites or other apps. It reads videos on this device.")
+                Text("This link opens a page, not a video file. Twincut works with videos saved on this device.")
                     .font(.subheadline)
                     .foregroundStyle(Theme.text2)
                     .fixedSize(horizontal: false, vertical: true)

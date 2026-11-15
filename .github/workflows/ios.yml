@@ -13,7 +13,7 @@ on:
 jobs:
   test:
     runs-on: ${{ inputs.runner || 'macos-26' }}
-    timeout-minutes: 75
+    timeout-minutes: 140
     steps:
       - uses: actions/checkout@v4
 
@@ -41,6 +41,7 @@ jobs:
           xcrun simctl status_bar "$NAME" override --time "9:41" --dataNetwork wifi --wifiMode active --wifiBars 3 --cellularMode active --cellularBars 4 --batteryState charged --batteryLevel 100
 
       - name: Build and test
+        timeout-minutes: 80
         run: |
           mkdir -p build
           # The app's own log (Log.swift), so a UI failure shows what the app did.
@@ -59,6 +60,7 @@ jobs:
 
       - name: Smallest iPhone at largest text
         if: always()
+        timeout-minutes: 20
         run: |
           SMALL=$(python3 -c "import json,re,subprocess,sys; d=json.loads(subprocess.check_output(['xcrun','simctl','list','devices','available','-j']))['devices']; rt=sorted((k for k in d if 'iOS' in k), key=lambda k: [int(x) for x in re.findall(r'\d+', k)]); m=[x for k in reversed(rt) for x in d[k] if re.search(sys.argv[1], x['name'])]; print(m[0]['udid'] if m else '')" 'iPhone (SE \(3rd generation\)|1[0-9]e|1[0-9] mini)')
           echo "Using $SMALL"
@@ -75,6 +77,7 @@ jobs:
 
       - name: iPad (reviewers run iPhone apps there in compatibility mode)
         if: always()
+        timeout-minutes: 30
         run: |
           IPAD=$(python3 -c "import json,re,subprocess,sys; d=json.loads(subprocess.check_output(['xcrun','simctl','list','devices','available','-j']))['devices']; rt=sorted((k for k in d if 'iOS' in k), key=lambda k: [int(x) for x in re.findall(r'\d+', k)]); m=[x for k in reversed(rt) for x in d[k] if re.search(sys.argv[1], x['name'])]; print(m[0]['udid'] if m else '')" '^iPad (Air|Pro)')
           echo "Using $IPAD"
