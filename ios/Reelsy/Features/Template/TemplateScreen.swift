@@ -217,6 +217,7 @@ struct TemplateView: View {
             .accessibilityIdentifier("choose-clips")
             Button("Try it with sample clips") {
                 let n = clipCount
+                Log.library.notice("sample clips tapped: \(n)")
                 startImport(n) { progress in try await ClipImporter.sampleClips(count: n, progress: progress) }
             }
             .buttonStyle(LinkButtonStyle(color: Theme.text))
@@ -273,10 +274,16 @@ struct TemplateView: View {
             do {
                 let clips = try await load { if importID == id { imported = $0 } }
                 try Task.checkCancellation()
-                guard importID == id, !clips.isEmpty else { return }
+                guard importID == id, !clips.isEmpty else {
+                    Log.library.notice("import dropped: current \(importID == id), clips \(clips.count)")
+                    return
+                }
+                Log.library.notice("import done: \(clips.count) clips, opening editor")
                 model.startProject(template: template, clips: clips)
             } catch is CancellationError {
+                Log.library.notice("import cancelled")
             } catch {
+                Log.library.error("import failed: \(String(describing: error), privacy: .public)")
                 if importID == id { importError = error.localizedDescription }
             }
         }
