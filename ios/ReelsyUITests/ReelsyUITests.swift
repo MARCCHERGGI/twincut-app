@@ -96,7 +96,7 @@ final class ReelsyUITests: XCTestCase {
         XCTAssertTrue(app.buttons["Beat"].waitForExistence(timeout: 5), "Twincut's beat is offered")
         XCTAssertTrue(app.buttons["Beat"].isSelected, "and is the default")
         XCTAssertFalse(app.buttons["Reel's audio"].exists, "the copied reel's audio is never offered")
-        sleep(1)
+        sleep(4)  // the simulator's first decoded frames of a clip are blocky; this is a store screenshot
         shot("09-sample-sound")
     }
 
