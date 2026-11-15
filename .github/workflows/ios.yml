@@ -69,8 +69,19 @@ jobs:
           xcrun simctl bootstatus "$SMALL" -b
           cd ios
           set +e
-          xcodebuild test             -project Reelsy.xcodeproj -scheme Reelsy             -destination "id=$SMALL"             -only-testing:ReelsyUITests/ReelsyUITests/testLayoutAtLargestText             -resultBundlePath ../build/Small.xcresult             CODE_SIGNING_ALLOWED=NO > ../build/small.log 2>&1
+          run_small() { rm -rf ../build/Small.xcresult; xcodebuild test             -project Reelsy.xcodeproj -scheme Reelsy             -destination "id=$SMALL"             -only-testing:ReelsyUITests/ReelsyUITests/testLayoutAtLargestText             -resultBundlePath ../build/Small.xcresult             CODE_SIGNING_ALLOWED=NO > ../build/small.log 2>&1; }
+          run_small
           status=$?
+          # After a long run the simulator service can drop every destination; restart it once and retry.
+          if grep -q "Unable to find a device matching" ../build/small.log; then
+            echo "simulator service lost its devices; restarting it"
+            xcrun simctl shutdown all || true
+            sudo killall -9 com.apple.CoreSimulator.CoreSimulatorService || true
+            xcrun simctl boot "$SMALL" || true
+            xcrun simctl bootstatus "$SMALL" -b
+            run_small
+            status=$?
+          fi
           grep -E "error:|Test Case .*(passed|failed)|TEST (SUCCEEDED|FAILED)" ../build/small.log | tail -n 40
           grep -E "(error|failed) .*-\[|accessibility issues|^[a-z-]+: .*\[" ../build/small.log | head -n 60 | sed 's/^/::error::small: /' || true
           exit $status
