@@ -38,9 +38,12 @@ struct VideoLink: Identifiable, Equatable {
 
     /// The video app this link belongs to, including the servers it streams its videos from.
     /// Twincut never fetches from these: their videos aren't the user's to download.
-    var platform: String? {
+    var platform: String? { Self.platform(of: url) }
+
+    /// The video app an address belongs to; also checked on every redirect a link takes.
+    static func platform(of url: URL) -> String? {
         let host = (url.host() ?? "").lowercased()
-        return Self.platforms.first { $0.domains.contains { host == $0 || host.hasSuffix("." + $0) } }?.name
+        return platforms.first { $0.domains.contains { host == $0 || host.hasSuffix("." + $0) } }?.name
     }
 
     private static let platforms: [(name: String, domains: [String])] = [
@@ -128,7 +131,7 @@ struct PasteLinkBox: View {
             .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Theme.raised))
             .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).strokeBorder(Theme.stroke))
             if invalid {
-                Text("That isn't a link. In any app, tap Share on the video, then Copy link.")
+                Text("That isn't a link. Paste a web address, like a link to a video file in your cloud drive.")
                     .font(.footnote)
                     .foregroundStyle(Theme.text2)
                     .fixedSize(horizontal: false, vertical: true)
@@ -198,20 +201,5 @@ struct GetVideoSheet: View {
         }
         .background(Theme.surface.ignoresSafeArea())
         .presentationDetents([.medium, .large])
-    }
-
-    private func step(_ n: Int, _ text: String) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: 14) {
-            Text("\(n)")
-                .font(.subheadline.weight(.bold).monospacedDigit())
-                .foregroundStyle(.black)
-                .frame(minWidth: 26, minHeight: 26)
-                .background(Circle().fill(Theme.accent))
-                .accessibilityHidden(true)
-            Text(text)
-                .font(.body)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-        .accessibilityElement(children: .combine)
     }
 }

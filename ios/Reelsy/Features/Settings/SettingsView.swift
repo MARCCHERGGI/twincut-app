@@ -35,7 +35,7 @@ struct SettingsView: View {
                 }
 
                 Section {
-                    Text("Twincut works entirely on this device. Videos you pick are read here and never uploaded. Your templates are saved on this device only.")
+                    Text("Twincut edits on this device. Videos are read here and never uploaded; a link to a video file is downloaded only to be read, then deleted. Your templates are saved on this device only.")
                         .font(.footnote)
                         .foregroundStyle(Theme.text2)
                 } header: {

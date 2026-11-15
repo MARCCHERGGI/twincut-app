@@ -80,7 +80,7 @@ struct AnalyzeView: View {
                     }
                 }
                 .padding(.horizontal, 36)
-                Text("Everything happens on this device. The video isn't uploaded or kept.")
+                Text("Twincut reads the video on this device. Nothing is uploaded, and the video isn't kept.")
                     .font(.footnote)
                     .foregroundStyle(Theme.text3)
                     .multilineTextAlignment(.center)

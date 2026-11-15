@@ -45,6 +45,9 @@ final class VideoLinkTests: XCTestCase {
         XCTAssertNil(try XCTUnwrap(VideoLink(text: "https://twincut.pages.dev/test/sample-reel.mp4")).platform)
         XCTAssertNil(try XCTUnwrap(VideoLink(text: "https://notyoutube.com/a.mp4")).platform, "only the app's own domains")
         XCTAssertEqual(VideoLink(text: "https://v16.tiktokcdn.com/a.mp4")?.siteName, "TikTok")
+        // Redirect targets are checked the same way, so a short link can't lead to a video app's file.
+        XCTAssertEqual(VideoLink.platform(of: URL(string: "https://scontent-lga3-1.cdninstagram.com/o1/v/x.mp4")!), "Instagram")
+        XCTAssertNil(VideoLink.platform(of: URL(string: "https://dl.dropboxusercontent.com/s/abc/take.mp4")!))
     }
 
     func testVideoFileAddresses() throws {

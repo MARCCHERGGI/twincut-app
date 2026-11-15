@@ -25,8 +25,10 @@ enum LinkDownloader {
         guard link.platform == nil else { return false }  // not even asked
         var request = URLRequest(url: link.url, timeoutInterval: 8)
         request.httpMethod = "HEAD"
-        guard let answer = try? await URLSession.shared.data(for: request),
-              let http = answer.1 as? HTTPURLResponse, (200..<400).contains(http.statusCode)
+        let redirects = RedirectGuard()
+        let answer = try? await URLSession.shared.data(for: request, delegate: redirects)
+        if redirects.blocked { return false }
+        guard let answer, let http = answer.1 as? HTTPURLResponse, (200..<400).contains(http.statusCode)
         else { return link.namesVideoFile }
         return isVideo(mime: http.mimeType, link: link)
     }
@@ -37,7 +39,10 @@ enum LinkDownloader {
         // Refuse an oversized file before fetching it when the server says how big it is.
         var head = URLRequest(url: link.url, timeoutInterval: 8)
         head.httpMethod = "HEAD"
-        if let answer = try? await URLSession.shared.data(for: head), answer.1.expectedContentLength > maxBytes {
+        let redirects = RedirectGuard()
+        let answer = try? await URLSession.shared.data(for: head, delegate: redirects)
+        if redirects.blocked { throw Failure.platform }
+        if let answer, answer.1.expectedContentLength > maxBytes {
             throw Failure.tooBig
         }
         if let free = Storage.freeBytes(), free < 2 * maxBytes / 10 {
@@ -46,7 +51,7 @@ enum LinkDownloader {
         let file: URL
         let response: URLResponse
         do {
-            (file, response) = try await URLSession.shared.download(for: URLRequest(url: link.url, timeoutInterval: 30))
+            (file, response) = try await URLSession.shared.download(for: URLRequest(url: link.url, timeoutInterval: 30), delegate: redirects)
         } catch is CancellationError {
             throw CancellationError()
         } catch let error as URLError where error.code == .cancelled {
@@ -55,6 +60,7 @@ enum LinkDownloader {
             throw Failure.unreachable
         }
         defer { try? FileManager.default.removeItem(at: file) }
+        if redirects.blocked { throw Failure.platform }
         guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else { throw Failure.unreachable }
         guard isVideo(mime: http.mimeType, link: link) else { throw Failure.notAVideo }
         let size = (try? file.resourceValues(forKeys: [.fileSizeKey]).fileSize).map(Int64.init) ?? 0
@@ -63,6 +69,20 @@ enum LinkDownloader {
         let dest = Storage.newClipURL(ext: ext)
         try FileManager.default.moveItem(at: file, to: dest)
         return dest
+    }
+
+    /// Follows a link's redirects, but never onto a video app's servers (a short link to a TikTok file).
+    private final class RedirectGuard: NSObject, URLSessionTaskDelegate, @unchecked Sendable {
+        private(set) var blocked = false
+
+        func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse,
+                        newRequest request: URLRequest) async -> URLRequest? {
+            guard let url = request.url, VideoLink.platform(of: url) == nil else {
+                blocked = true
+                return nil
+            }
+            return request
+        }
     }
 
     private static func isVideo(mime: String?, link: VideoLink) -> Bool {

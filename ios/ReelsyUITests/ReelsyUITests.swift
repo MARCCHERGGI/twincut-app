@@ -231,7 +231,7 @@ final class ReelsyUITests: XCTestCase {
         XCTAssertTrue(field.waitForExistence(timeout: 10))
         field.tap()
         field.typeText("great edit\n")
-        XCTAssertTrue(app.staticTexts["That isn't a link. In any app, tap Share on the video, then Copy link."].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["That isn't a link. Paste a web address, like a link to a video file in your cloud drive."].waitForExistence(timeout: 5))
 
         field.tap()
         field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 12))  // the rejected text stays for editing
