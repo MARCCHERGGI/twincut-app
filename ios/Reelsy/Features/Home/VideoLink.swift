@@ -42,7 +42,9 @@ struct VideoLink: Identifiable, Equatable {
 
     /// The video app an address belongs to; also checked on every redirect a link takes.
     static func platform(of url: URL) -> String? {
-        let host = (url.host() ?? "").lowercased()
+        // "www.youtube.com." is the same host as "www.youtube.com".
+        var host = (url.host() ?? "").lowercased()
+        while host.hasSuffix(".") { host.removeLast() }
         return platforms.first { $0.domains.contains { host == $0 || host.hasSuffix("." + $0) } }?.name
     }
 

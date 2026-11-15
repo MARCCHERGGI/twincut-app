@@ -72,7 +72,7 @@ enum LinkDownloader {
     }
 
     /// Follows a link's redirects, but never onto a video app's servers (a short link to a TikTok file).
-    private final class RedirectGuard: NSObject, URLSessionTaskDelegate, @unchecked Sendable {
+    final class RedirectGuard: NSObject, URLSessionTaskDelegate, @unchecked Sendable {
         private(set) var blocked = false
 
         func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse,

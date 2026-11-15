@@ -48,6 +48,24 @@ final class VideoLinkTests: XCTestCase {
         // Redirect targets are checked the same way, so a short link can't lead to a video app's file.
         XCTAssertEqual(VideoLink.platform(of: URL(string: "https://scontent-lga3-1.cdninstagram.com/o1/v/x.mp4")!), "Instagram")
         XCTAssertNil(VideoLink.platform(of: URL(string: "https://dl.dropboxusercontent.com/s/abc/take.mp4")!))
+        XCTAssertEqual(VideoLink.platform(of: URL(string: "https://www.youtube.com./watch?v=1")!), "YouTube", "trailing dot")
+    }
+
+    func testRedirectOntoAVideoAppIsStopped() async throws {
+        let task = URLSession.shared.dataTask(with: URL(string: "https://bit.ly/x")!)
+        let moved = try XCTUnwrap(HTTPURLResponse(url: URL(string: "https://bit.ly/x")!, statusCode: 302, httpVersion: nil, headerFields: nil))
+
+        let guardA = LinkDownloader.RedirectGuard()
+        let toTikTok = URLRequest(url: URL(string: "https://v16-webapp.tiktokcdn.com/v/clip.mp4")!)
+        let stopped = await guardA.urlSession(.shared, task: task, willPerformHTTPRedirection: moved, newRequest: toTikTok)
+        XCTAssertNil(stopped)
+        XCTAssertTrue(guardA.blocked)
+
+        let guardB = LinkDownloader.RedirectGuard()
+        let toDrive = URLRequest(url: URL(string: "https://dl.dropboxusercontent.com/s/abc/take.mp4")!)
+        let followed = await guardB.urlSession(.shared, task: task, willPerformHTTPRedirection: moved, newRequest: toDrive)
+        XCTAssertEqual(followed?.url, toDrive.url)
+        XCTAssertFalse(guardB.blocked)
     }
 
     func testVideoFileAddresses() throws {
